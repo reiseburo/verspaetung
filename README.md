@@ -11,3 +11,9 @@ reports it to statsd.
 
 
 
+
+### Hacking
+
+* *Running tests:* `./gradlew check`
+* *Running the app locally:* `./gradlew run`
+* *Building the app for distribution:* `./gradlew shadowJar`

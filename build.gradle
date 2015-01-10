@@ -1,5 +1,6 @@
 plugins {
     id "com.jfrog.bintray" version "1.0"
+    id 'com.github.johnrengelman.shadow' version '1.2.0'
 }
 apply plugin: 'groovy'
 apply plugin: 'application'
@@ -26,14 +27,17 @@ test {
 ////////////////////////////////////////////////////////////////////////////////
 //  DEPENDENCY MANAGEMENT
 repositories {
+    mavenCentral()
     jcenter()
 }
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.9+'
 
-    compile 'org.apache.curator:curator-client:jar:2.4.0'
+    compile 'org.apache.curator:curator-framework:2.4.0'
     compile 'org.apache.kafka:kafka_2.10:0.8.1.+'
+
+    compile 'com.timgroup:java-statsd-client:3.0.1+'
 
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
     testCompile 'cglib:cglib-nodep:2.2.+'
@@ -42,8 +46,16 @@ dependencies {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/* Make sure we run tests before building our package */
-assemble.dependsOn test
+shadowJar {
+    exclude 'META-INF/*.RSA', 'META-INF/*.DSA'
+    manifest {
+        attributes 'Main-Class' : mainClassName
+    }
+
+    dependsOn check
+}
+assemble.dependsOn shadowJar
+
 
 bintray {
     user = project.bintrayUser
