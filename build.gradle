@@ -34,7 +34,13 @@ repositories {
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.9+'
 
-    compile 'org.apache.curator:curator-framework:2.4.0'
+    [
+     'curator-framework',
+     'curator-recipes',
+    ].each { artifactName ->
+        compile("org.apache.curator:${artifactName}:2.7.0")
+    }
+
     compile 'org.apache.kafka:kafka_2.10:0.8.1.+'
 
     compile 'com.timgroup:java-statsd-client:3.0.1+'
