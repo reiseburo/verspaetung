@@ -1,11 +1,13 @@
 package com.github.lookout.verspaetung.zk
 
+import groovy.transform.TypeChecked
 import org.apache.curator.framework.recipes.cache.ChildData
 
 /**
  * StandardTreeWatcher processes Zookeeper paths for standard high-level Kafka
  * consumers
  */
+@TypeChecked
 class StandardTreeWatcher extends AbstractTreeWatcher {
 
     /**
@@ -21,9 +23,9 @@ ChildData{path='/consumers/offtopic-spock-test/offsets/topic/7', stat=8595174473
         */
         ConsumerOffset offset = new ConsumerOffset()
 
-        List pathParts = data.path.split(/\//)
+        List<String> pathParts = data.path.split(/\//) as List<String>
 
-        if (pathParts.size != 6) {
+        if (pathParts.size() != 6) {
             return null
         }
 

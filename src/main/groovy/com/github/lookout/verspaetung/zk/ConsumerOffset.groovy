@@ -12,6 +12,14 @@ class ConsumerOffset {
     private Integer partition
     private ChildData rawData
 
+    ConsumerOffset() {
+    }
+
+    ConsumerOffset(String topic, Integer partition, Integer offset) {
+        this.topic = topic
+        this.partition = partition
+        this.offset = offset
+    }
 
     String toString() {
         return "ConsumerOffset[${hashCode()}] ${topic}:${partition} ${groupName} is at ${offset}"

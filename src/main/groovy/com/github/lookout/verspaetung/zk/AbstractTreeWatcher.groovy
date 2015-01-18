@@ -1,6 +1,7 @@
 package com.github.lookout.verspaetung.zk
 
-import groovy.transform.TypeChecked
+import java.util.concurrent.ConcurrentHashMap
+
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
 import org.apache.curator.framework.recipes.cache.TreeCacheListener
@@ -12,8 +13,13 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent
  * watchers is to process events from the TreeCache and emit processed events
  * further down the pipeline
  */
-@TypeChecked
 abstract class AbstractTreeWatcher implements TreeCacheListener {
+    protected Map consumersMap = [:]
+
+    AbstractTreeWatcher() { }
+    AbstractTreeWatcher(Map consumers) {
+        this.consumersMap = consumers
+    }
 
     /**
      * Process the ChildData associated with an event
@@ -32,7 +38,23 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
         ConsumerOffset offset = processChildData(event?.data)
 
         if (offset != null) {
-            println offset
+            trackConsumerOffset(offset)
+        }
+    }
+
+    /**
+     *
+     */
+    void trackConsumerOffset(ConsumerOffset offset) {
+        if (this.consumersMap == null) {
+            return
+        }
+
+        if (this.consumersMap.containsKey(offset.topic)) {
+            this.consumersMap[offset.topic] << offset
+        }
+        else {
+            this.consumersMap[offset.topic] = [offset]
         }
     }
 

@@ -36,4 +36,42 @@ class AbstractTreeWatcherSpec extends Specification {
         expect:
         watcher.isNodeEvent(event) == true
     }
+
+
+    def "childEvent() not processChildData if the event is not to be processed"() {
+        given:
+        watcher = Spy(MockWatcher)
+        1 * watcher.isNodeEvent(_) >> false
+        0 * watcher.processChildData(_) >> null
+
+        expect:
+        watcher.childEvent(null, null)
+    }
+
+    def "trackConsumerOffset() should create a new list for new topics in the map"() {
+        given:
+        ConsumerOffset offset = new ConsumerOffset('spock-topic', 0, 1337)
+
+        when:
+        watcher.trackConsumerOffset(offset)
+
+        then:
+        watcher.consumersMap.size() == 1
+    }
+
+    def "trackConsumerOffset() should append to a list for existing topics in the map"() {
+        given:
+        String topic = 'spock-topic'
+        ConsumerOffset offset = new ConsumerOffset(topic, 0, 1337)
+        ConsumerOffset secondOffset = new ConsumerOffset(topic, 1, 0)
+
+        when:
+        watcher.trackConsumerOffset(offset)
+        watcher.trackConsumerOffset(secondOffset)
+
+        then:
+        watcher.consumersMap.size() == 1
+        watcher.consumersMap[topic].size() == 2
+
+    }
 }
