@@ -10,33 +10,23 @@ import org.apache.curator.framework.recipes.cache.TreeCacheListener
 class Main {
     static void main(String[] args) {
         println "Running ${args}"
+        // XXX: Early exit until testing
+        return
 
         ExponentialBackoffRetry retry = new ExponentialBackoffRetry(1000, 3)
         CuratorFramework client = CuratorFrameworkFactory.newClient(args[0], retry)
         client.start()
-        TreeCache cache = new TreeCache(client, '/kafka_spout')
+        TreeCache cache = new TreeCache(client, '/consumers')
         println cache
 
-        cache.listenable.addListener([
-            childEvent: { cl, ev ->
-                println "EV: ${ev}"
-            }
-        ] as TreeCacheListener)
-
+        cache.listenable.addListener(new zk.StandardTreeWatcher())
 
         cache.start()
         println 'started..'
 
-        Boolean foundChildren = false
-        Map children = null
+        Thread.sleep(5 * 1000)
 
-        while ((children == null) || children.isEmpty()) {
-            children = cache.getCurrentChildren('/kafka_spout')
-            println "CHILDREN: ${children}"
-
-            Thread.sleep(100)
-        }
-        [1, 2, 3].each { Thread.sleep(300) }
+        println 'exiting..'
         return
 
         client.children.forPath('/consumers').each { path ->

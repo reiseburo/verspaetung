@@ -10,10 +10,8 @@ information, Verspätung computs the delta for each of the consumer groups and
 reports it to statsd.
 
 
-
-
 ### Hacking
 
 * *Running tests:* `./gradlew check`
-* *Running the app locally:* `./gradlew run`
+* *Running the app locally:* `./gradlew run -PzookeeperHosts=localhost:2181`
 * *Building the app for distribution:* `./gradlew shadowJar`
