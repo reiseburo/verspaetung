@@ -1,6 +1,7 @@
 package com.github.lookout.verspaetung
 
 import com.github.lookout.verspaetung.zk.BrokerTreeWatcher
+import com.github.lookout.verspaetung.zk.StandardTreeWatcher
 
 import java.util.concurrent.ConcurrentHashMap
 import groovy.transform.TypeChecked
@@ -8,11 +9,7 @@ import groovy.transform.TypeChecked
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.CuratorFramework
-import org.apache.zookeeper.KeeperException
 import org.apache.curator.framework.recipes.cache.TreeCache
-import org.apache.curator.framework.recipes.cache.TreeCacheListener
-
-import kafka.client.ClientUtils
 
 //@TypeChecked
 class Main {
@@ -26,21 +23,26 @@ class Main {
         client.start()
 
         TreeCache cache = new TreeCache(client, '/consumers')
-        cache.listenable.addListener(new zk.StandardTreeWatcher(consumers))
 
         KafkaPoller poller = new KafkaPoller()
+        StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(consumers)
+        consumerWatcher.onInitComplete = {
+            println "standard consumers initialized to ${consumers.size()} (topic, partition) tuples"
+        }
+
         BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client)
         brokerWatcher.onBrokerUpdates = { brokers ->
             poller.refresh(brokers)
         }
 
-        poller.start()
+        cache.listenable.addListener(consumerWatcher)
 
+        poller.start()
         brokerWatcher.start()
         cache.start()
         println 'started..'
 
-        Thread.sleep(5 * 1000)
+        Thread.sleep(9 * 1000)
 
         println 'exiting..'
         poller.die()

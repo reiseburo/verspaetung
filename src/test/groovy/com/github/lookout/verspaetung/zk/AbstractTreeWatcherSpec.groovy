@@ -10,6 +10,9 @@ class AbstractTreeWatcherSpec extends Specification {
     private AbstractTreeWatcher watcher
 
     class MockWatcher extends AbstractTreeWatcher {
+        MockWatcher() {
+            super([:])
+        }
         ConsumerOffset processChildData(ChildData d) { }
     }
 
@@ -37,7 +40,6 @@ class AbstractTreeWatcherSpec extends Specification {
         expect:
         watcher.isNodeEvent(event) == true
     }
-
 
     def "childEvent() not processChildData if the event is not to be processed"() {
         given:

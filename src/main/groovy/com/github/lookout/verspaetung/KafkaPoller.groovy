@@ -2,6 +2,8 @@ package com.github.lookout.verspaetung
 
 import groovy.transform.TypeChecked
 
+import kafka.client.ClientUtils
+
 @TypeChecked
 class KafkaPoller extends Thread {
     private Boolean keepRunning = true

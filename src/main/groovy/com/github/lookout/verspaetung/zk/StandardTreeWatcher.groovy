@@ -1,6 +1,7 @@
 package com.github.lookout.verspaetung.zk
 
 import groovy.transform.TypeChecked
+import groovy.transform.InheritConstructors
 import org.apache.curator.framework.recipes.cache.ChildData
 
 /**
@@ -8,6 +9,7 @@ import org.apache.curator.framework.recipes.cache.ChildData
  * consumers
  */
 @TypeChecked
+@InheritConstructors
 class StandardTreeWatcher extends AbstractTreeWatcher {
 
     /**

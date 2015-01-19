@@ -8,7 +8,7 @@ class StandardTreeWatcherSpec extends Specification {
     private StandardTreeWatcher watcher
 
     def setup() {
-        this.watcher = new StandardTreeWatcher()
+        this.watcher = new StandardTreeWatcher([:])
     }
 
     def "processChildData should return null if null is given"() {

@@ -1,7 +1,6 @@
 package com.github.lookout.verspaetung.zk
 
 import com.github.lookout.verspaetung.TopicPartition
-import java.util.concurrent.ConcurrentHashMap
 
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
@@ -15,10 +14,10 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent
  * further down the pipeline
  */
 abstract class AbstractTreeWatcher implements TreeCacheListener {
-    protected Map consumersMap = [:]
+    protected AbstractMap consumersMap
+    protected Closure onInitComplete
 
-    AbstractTreeWatcher() { }
-    AbstractTreeWatcher(Map consumers) {
+    AbstractTreeWatcher(AbstractMap consumers) {
         this.consumersMap = consumers
     }
 
@@ -31,6 +30,10 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
      * Primary TreeCache event processing callback
      */
     void childEvent(CuratorFramework client, TreeCacheEvent event) {
+        if (event?.type == TreeCacheEvent.Type.INITIALIZED) {
+            this.onInitComplete?.call()
+        }
+
         /* bail out early if we don't care about the event */
         if (!isNodeEvent(event)) {
             return
