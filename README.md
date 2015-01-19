@@ -1,5 +1,8 @@
 # Verspätung
 
+[![Build
+Status](https://travis-ci.org/lookout/verspaetung.svg)](https://travis-ci.org/lookout/verspaetung)
+
 Verspätung is a small utility which aims to help identify delay of
 [Kafka](http://kafka.apache.org) consumers.
 
