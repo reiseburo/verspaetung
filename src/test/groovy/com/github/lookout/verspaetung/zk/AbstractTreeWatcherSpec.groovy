@@ -2,6 +2,7 @@ package com.github.lookout.verspaetung.zk
 
 import spock.lang.*
 
+import com.github.lookout.verspaetung.TopicPartition
 import org.apache.curator.framework.recipes.cache.ChildData
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent
 
@@ -62,8 +63,11 @@ class AbstractTreeWatcherSpec extends Specification {
     def "trackConsumerOffset() should append to a list for existing topics in the map"() {
         given:
         String topic = 'spock-topic'
+        TopicPartition mapKey = new TopicPartition(topic, 0)
         ConsumerOffset offset = new ConsumerOffset(topic, 0, 1337)
-        ConsumerOffset secondOffset = new ConsumerOffset(topic, 1, 0)
+        offset.groupName = 'spock-1'
+        ConsumerOffset secondOffset = new ConsumerOffset(topic, 0, 0)
+        secondOffset.groupName = 'spock-2'
 
         when:
         watcher.trackConsumerOffset(offset)
@@ -71,7 +75,7 @@ class AbstractTreeWatcherSpec extends Specification {
 
         then:
         watcher.consumersMap.size() == 1
-        watcher.consumersMap[topic].size() == 2
+        watcher.consumersMap[mapKey].size() == 2
 
     }
 }

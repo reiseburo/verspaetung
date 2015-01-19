@@ -1,5 +1,6 @@
 package com.github.lookout.verspaetung.zk
 
+import com.github.lookout.verspaetung.TopicPartition
 import java.util.concurrent.ConcurrentHashMap
 
 import org.apache.curator.framework.CuratorFramework
@@ -43,18 +44,21 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
     }
 
     /**
-     *
+     * Keep track of a ConsumerOffset in the consumersMap that was passed into
+     * this class on instantiation
      */
     void trackConsumerOffset(ConsumerOffset offset) {
         if (this.consumersMap == null) {
             return
         }
 
-        if (this.consumersMap.containsKey(offset.topic)) {
-            this.consumersMap[offset.topic] << offset
+        TopicPartition key = new TopicPartition(offset.topic, offset.partition)
+
+        if (this.consumersMap.containsKey(key)) {
+            this.consumersMap[key] << offset
         }
         else {
-            this.consumersMap[offset.topic] = [offset]
+            this.consumersMap[key] = [offset]
         }
     }
 

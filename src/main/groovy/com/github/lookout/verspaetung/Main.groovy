@@ -19,7 +19,7 @@ class Main {
 
         ExponentialBackoffRetry retry = new ExponentialBackoffRetry(1000, 3)
         CuratorFramework client = CuratorFrameworkFactory.newClient(args[0], retry)
-        ConcurrentHashMap<String, zk.ConsumerOffset> consumers = new ConcurrentHashMap()
+        ConcurrentHashMap<TopicPartition, List<zk.ConsumerOffset>> consumers = new ConcurrentHashMap()
         client.start()
         TreeCache cache = new TreeCache(client, '/consumers')
         println cache
@@ -29,7 +29,7 @@ class Main {
         cache.start()
         println 'started..'
 
-        Thread.sleep(9 * 1000)
+        Thread.sleep(5 * 1000)
 
         println 'exiting..'
         return
