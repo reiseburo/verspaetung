@@ -24,10 +24,11 @@ class Main {
 
         TreeCache cache = new TreeCache(client, '/consumers')
 
-        KafkaPoller poller = new KafkaPoller()
+        KafkaPoller poller = new KafkaPoller(consumers)
         StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(consumers)
         consumerWatcher.onInitComplete << {
             println "standard consumers initialized to ${consumers.size()} (topic, partition) tuples"
+            poller.dumpMetadata()
         }
 
         BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client)
@@ -42,7 +43,7 @@ class Main {
         cache.start()
         println 'started..'
 
-        Thread.sleep(9 * 1000)
+        Thread.sleep(10 * 1000)
 
         println 'exiting..'
         poller.die()

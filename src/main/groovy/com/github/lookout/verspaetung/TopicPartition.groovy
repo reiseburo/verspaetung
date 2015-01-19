@@ -39,4 +39,9 @@ class TopicPartition {
     int hashCode() {
         return Objects.hash(this.topic, this.partition)
     }
+
+    @Override
+    String toString() {
+        return "${this.topic}:${this.partition}"
+    }
 }
