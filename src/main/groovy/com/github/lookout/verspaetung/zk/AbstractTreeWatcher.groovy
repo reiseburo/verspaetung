@@ -2,6 +2,8 @@ package com.github.lookout.verspaetung.zk
 
 import com.github.lookout.verspaetung.TopicPartition
 
+import groovy.transform.TypeChecked
+
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
 import org.apache.curator.framework.recipes.cache.TreeCacheListener
@@ -13,12 +15,14 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent
  * watchers is to process events from the TreeCache and emit processed events
  * further down the pipeline
  */
+@TypeChecked
 abstract class AbstractTreeWatcher implements TreeCacheListener {
-    protected AbstractMap consumersMap
-    protected Closure onInitComplete
+    protected AbstractMap<TopicPartition, List<ConsumerOffset>> consumersMap
+    protected List<Closure> onInitComplete
 
     AbstractTreeWatcher(AbstractMap consumers) {
         this.consumersMap = consumers
+        this.onInitComplete = []
     }
 
     /**
@@ -31,7 +35,9 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
      */
     void childEvent(CuratorFramework client, TreeCacheEvent event) {
         if (event?.type == TreeCacheEvent.Type.INITIALIZED) {
-            this.onInitComplete?.call()
+            this.onInitComplete.each { Closure c ->
+                c?.call()
+            }
         }
 
         /* bail out early if we don't care about the event */

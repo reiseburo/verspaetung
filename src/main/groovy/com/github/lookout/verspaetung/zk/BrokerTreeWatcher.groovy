@@ -24,7 +24,7 @@ class BrokerTreeWatcher implements TreeCacheListener {
     private JsonSlurper json
     private TreeCache cache
     private final String BROKERS_PATH = '/brokers/ids'
-    private Closure onBrokerUpdates
+    private List<Closure> onBrokerUpdates
     private Boolean isTreeInitialized = false
     private List<KafkaBroker> brokers
 
@@ -33,6 +33,7 @@ class BrokerTreeWatcher implements TreeCacheListener {
         this.cache = new TreeCache(client, BROKERS_PATH)
         this.cache.listenable.addListener(this)
         this.brokers = []
+        this.onBrokerUpdates = []
     }
 
     /**
@@ -52,7 +53,10 @@ class BrokerTreeWatcher implements TreeCacheListener {
          */
         if (event.type == TreeCacheEvent.Type.INITIALIZED) {
             this.isTreeInitialized = true
-            this.onBrokerUpdates?.call(Collections.synchronizedList(this.brokers))
+            List threadsafeBrokers = Collections.synchronizedList(this.brokers)
+            this.onBrokerUpdates.each { Closure c ->
+                c?.call(threadsafeBrokers)
+            }
             return
         }
 

@@ -26,12 +26,12 @@ class Main {
 
         KafkaPoller poller = new KafkaPoller()
         StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(consumers)
-        consumerWatcher.onInitComplete = {
+        consumerWatcher.onInitComplete << {
             println "standard consumers initialized to ${consumers.size()} (topic, partition) tuples"
         }
 
         BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client)
-        brokerWatcher.onBrokerUpdates = { brokers ->
+        brokerWatcher.onBrokerUpdates << { brokers ->
             poller.refresh(brokers)
         }
 
