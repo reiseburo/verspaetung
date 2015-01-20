@@ -28,7 +28,6 @@ class Main {
         StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(consumers)
         consumerWatcher.onInitComplete << {
             println "standard consumers initialized to ${consumers.size()} (topic, partition) tuples"
-            poller.dumpMetadata()
         }
 
         BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client)
@@ -38,15 +37,20 @@ class Main {
 
         cache.listenable.addListener(consumerWatcher)
 
+        poller.onDelta << { String groupName, TopicPartition tp, Long delta ->
+            println "${groupName} ${tp} -- ${delta}"
+        }
+
         poller.start()
         brokerWatcher.start()
         cache.start()
         println 'started..'
 
-        Thread.sleep(10 * 1000)
+        Thread.sleep(5 * 1000)
 
         println 'exiting..'
         poller.die()
+        poller.join()
         return
     }
 }

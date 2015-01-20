@@ -24,6 +24,7 @@ class KafkaPoller extends Thread {
     private HashMap<Integer, SimpleConsumer> brokerConsumerMap = [:]
     private List<Broker> brokers = []
     private AbstractMap<TopicPartition, List<zk.ConsumerOffset>> consumersMap
+    private List<Closure> onDelta = []
 
     KafkaPoller(AbstractMap map) {
         this.consumersMap = map
@@ -35,6 +36,10 @@ class KafkaPoller extends Thread {
 
             if (shouldReconnect) {
                 reconnect()
+            }
+
+            if (this.consumersMap.size() > 0) {
+                dumpMetadata()
             }
 
             Thread.sleep(1 * 1000)
@@ -52,19 +57,31 @@ class KafkaPoller extends Thread {
 
         withScalaCollection(metadata.topicsMetadata).each { kafka.api.TopicMetadata f ->
             withScalaCollection(f.partitionsMetadata).each { p ->
-                println "Consumer for ${f.topic}:${p.partitionId}"
-                SimpleConsumer consumer = this.brokerConsumerMap[p.leader.get().id]
-                println consumer
-                TopicAndPartition topicAndPart = new TopicAndPartition(f.topic, p.partitionId)
-                println consumer.earliestOrLatestOffset(
-                    topicAndPart,
-                    -1,
-                    0)
+                Long offset = latestFromLeader(p.leader.get()?.id, f.topic, p.partitionId)
+                TopicPartition tp = new TopicPartition(f.topic, p.partitionId)
+                print "Consumer for ${f.topic}:${p.partitionId}"
+                println " latest: ${offset}"
 
+                this.consumersMap[tp].each { zk.ConsumerOffset c ->
+                    Long delta = offset - c.offset
+                    if (delta > 0) {
+                        this.onDelta.each { Closure callback ->
+                            callback.call(c.groupName, tp, delta)
+                        }
+                    }
+                }
             }
         }
 
         println 'dumped'
+    }
+
+
+    Long latestFromLeader(Integer leaderId, String topic, Integer partition) {
+        SimpleConsumer consumer = this.brokerConsumerMap[leaderId]
+        TopicAndPartition topicAndPart = new TopicAndPartition(topic, partition)
+        /* XXX: A zero clientId into this method might not be right */
+        return consumer.earliestOrLatestOffset(topicAndPart, -1, 0)
     }
 
     Iterable withScalaCollection(scala.collection.Iterable iter) {
