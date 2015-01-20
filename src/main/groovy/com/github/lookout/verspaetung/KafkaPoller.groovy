@@ -59,8 +59,6 @@ class KafkaPoller extends Thread {
             withScalaCollection(f.partitionsMetadata).each { p ->
                 Long offset = latestFromLeader(p.leader.get()?.id, f.topic, p.partitionId)
                 TopicPartition tp = new TopicPartition(f.topic, p.partitionId)
-                print "Consumer for ${f.topic}:${p.partitionId}"
-                println " latest: ${offset}"
 
                 this.consumersMap[tp].each { zk.ConsumerOffset c ->
                     Long delta = offset - c.offset

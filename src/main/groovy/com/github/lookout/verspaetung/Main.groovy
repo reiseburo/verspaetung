@@ -6,6 +6,9 @@ import com.github.lookout.verspaetung.zk.StandardTreeWatcher
 import java.util.concurrent.ConcurrentHashMap
 import groovy.transform.TypeChecked
 
+import com.timgroup.statsd.StatsDClient
+import com.timgroup.statsd.NonBlockingStatsDClient
+
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.CuratorFramework
@@ -13,6 +16,8 @@ import org.apache.curator.framework.recipes.cache.TreeCache
 
 //@TypeChecked
 class Main {
+    private static final StatsDClient statsd = new NonBlockingStatsDClient('verspaetung', 'localhost', 8125)
+
     static void main(String[] args) {
         println "Running ${args}"
 
@@ -38,7 +43,7 @@ class Main {
         cache.listenable.addListener(consumerWatcher)
 
         poller.onDelta << { String groupName, TopicPartition tp, Long delta ->
-            println "${groupName} ${tp} -- ${delta}"
+            statsd.recordGaugeValue("${tp.topic}.${tp.partition}.${groupName}", delta)
         }
 
         poller.start()
@@ -46,7 +51,7 @@ class Main {
         cache.start()
         println 'started..'
 
-        Thread.sleep(5 * 1000)
+        while (true) { Thread.sleep(1000) }
 
         println 'exiting..'
         poller.die()
