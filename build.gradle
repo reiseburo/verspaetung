@@ -45,7 +45,13 @@ dependencies {
         compile("org.apache.curator:${artifactName}:2.7.0")
     }
 
+    /* We need the Kafka client libraries so we can fetch broker metadata
+     * directly from the cluster
+     */
     compile 'org.apache.kafka:kafka_2.10:0.8.1.+'
+
+    /* Needed for command line options parsing */
+    compile 'commons-cli:commons-cli:1.2+'
 
     compile 'com.timgroup:java-statsd-client:3.0.1+'
 
