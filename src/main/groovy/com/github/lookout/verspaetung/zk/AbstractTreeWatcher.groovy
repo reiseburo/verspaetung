@@ -2,6 +2,7 @@ package com.github.lookout.verspaetung.zk
 
 import com.github.lookout.verspaetung.TopicPartition
 
+import java.util.concurrent.CopyOnWriteArrayList
 import groovy.transform.TypeChecked
 
 import org.apache.curator.framework.CuratorFramework
@@ -71,7 +72,7 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
             this.consumersMap[key] << offset
         }
         else {
-            this.consumersMap[key] = [offset]
+            this.consumersMap[key] = new CopyOnWriteArrayList([offset])
         }
     }
 
