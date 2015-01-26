@@ -56,7 +56,7 @@ dependencies {
     /* Needed for command line options parsing */
     compile 'commons-cli:commons-cli:1.2+'
 
-    compile 'com.timgroup:java-statsd-client:3.1.0+'
+    compile 'com.timgroup:java-statsd-client:3.1.1+'
 
     /* Logback is to be used for logging through the app */
     compile 'ch.qos.logback:logback-classic:1.1.2+'
