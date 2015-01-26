@@ -52,7 +52,6 @@ class KafkaPoller extends Thread {
         }
     }
 
-    synchronized
     void dumpMetadata() {
         logger.debug("dumping meta-data")
 
