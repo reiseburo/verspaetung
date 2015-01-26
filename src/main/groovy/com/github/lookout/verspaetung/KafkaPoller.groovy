@@ -68,11 +68,10 @@ class KafkaPoller extends Thread {
                 TopicPartition tp = new TopicPartition(f.topic, p.partitionId)
 
                 this.consumersMap[tp].each { zk.ConsumerOffset c ->
+                    logger.debug("Values for ${c.groupName} on ${tp.topic}:${tp.partition}: ${offset} - ${c.offset}")
                     Long delta = offset - c.offset
-                    if (delta > 0) {
-                        this.onDelta.each { Closure callback ->
-                            callback.call(c.groupName, tp, delta)
-                        }
+                    this.onDelta.each { Closure callback ->
+                        callback.call(c.groupName, tp, delta)
                     }
                 }
             }
