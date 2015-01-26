@@ -9,7 +9,7 @@ group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
 version = '0.1.0-SNAPSHOT'
 mainClassName = 'com.github.lookout.verspaetung.Main'
-defaulTasks ['clean', 'check']
+defaultTasks 'clean', 'check'
 
 ////////////////////////////////////////////////////////////////////////////////
 //  TESTING
