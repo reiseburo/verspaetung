@@ -68,9 +68,15 @@ class BrokerTreeWatcher implements TreeCacheListener {
         }
 
         ChildData nodeData = event.data
+        Integer brokerId = brokerIdFromPath(nodeData.path)
+
+        if (brokerId == INVALID_BROKER_ID) {
+            return
+        }
+
         Object brokerData = json.parseText(new String(nodeData.data, 'UTF-8'))
 
-        this.brokers << new KafkaBroker(brokerData, brokerIdFromPath(nodeData.path))
+        this.brokers << new KafkaBroker(brokerData, brokerId)
     }
 
     /**
