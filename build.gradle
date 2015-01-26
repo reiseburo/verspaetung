@@ -9,6 +9,7 @@ group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
 version = '0.1.0-SNAPSHOT'
 mainClassName = 'com.github.lookout.verspaetung.Main'
+defaulTasks ['clean', 'check']
 
 ////////////////////////////////////////////////////////////////////////////////
 //  TESTING
@@ -33,6 +34,8 @@ run {
 repositories {
     mavenCentral()
     jcenter()
+
+    maven { url 'https://dl.bintray.com/rtyler/maven' }
 }
 
 dependencies {
@@ -53,7 +56,7 @@ dependencies {
     /* Needed for command line options parsing */
     compile 'commons-cli:commons-cli:1.2+'
 
-    compile 'com.timgroup:java-statsd-client:3.0.1+'
+    compile 'com.timgroup:java-statsd-client:3.1.0+'
 
     /* Logback is to be used for logging through the app */
     compile 'ch.qos.logback:logback-classic:1.1.2+'
