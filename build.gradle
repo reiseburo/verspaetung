@@ -22,10 +22,6 @@ test {
         events "passed", "skipped", "failed", "standardOut", "standardError"
     }
 }
-
-run {
-    args zookeeperHosts
-}
 ////////////////////////////////////////////////////////////////////////////////
 
 
