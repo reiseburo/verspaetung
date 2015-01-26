@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.9+'
+    compile 'org.codehaus.groovy:groovy-all:2.4.0+'
 
     [
      'curator-framework',
