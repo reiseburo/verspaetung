@@ -37,4 +37,20 @@ class StandardTreeWatcherSpec extends Specification {
         offset.partition == 3
         offset.offset == 0
     }
+
+    def "isOffsetSubtree should return true for a valid subtree path"() {
+        given:
+        String path = '/consumers/offtopic-spock-test/offsets/topic/7'
+
+        expect:
+        watcher.isOffsetSubtree(path) == true
+    }
+
+    def "isOffsetSubtree should return false for a non-offset subtree path"() {
+        given:
+        String path = '/consumers/offtopic-1025413624/owners/spock-hostname/0'
+
+        expect:
+        watcher.isOffsetSubtree(path) == false
+    }
 }
