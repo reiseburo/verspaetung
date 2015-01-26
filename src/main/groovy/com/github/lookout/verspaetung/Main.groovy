@@ -83,7 +83,10 @@ class Main {
 
         logger.info("Started wait loop...")
 
-        while (true) { Thread.sleep(1000) }
+        while (true) {
+            statsd?.recordGaugeValue('heartbeat', 1)
+            Thread.sleep(1 * 1000)
+        }
 
         logger.info("exiting..")
         poller.die()
