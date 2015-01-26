@@ -2,6 +2,10 @@ package com.github.lookout.verspaetung
 
 import groovy.transform.TypeChecked
 
+import java.util.concurrent.ConcurrentHashMap
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import kafka.cluster.Broker
 import kafka.client.ClientUtils
 import kafka.consumer.SimpleConsumer
@@ -18,10 +22,11 @@ class KafkaPoller extends Thread {
     private final String KAFKA_CLIENT_ID = 'VerspaetungClient'
     private final Integer KAFKA_TIMEOUT = (5 * 1000)
     private final Integer KAFKA_BUFFER = (100 * 1024)
+    private final Logger logger = LoggerFactory.getLogger(KafkaPoller.class)
 
     private Boolean keepRunning = true
     private Boolean shouldReconnect = false
-    private HashMap<Integer, SimpleConsumer> brokerConsumerMap = [:]
+    private ConcurrentHashMap<Integer, SimpleConsumer> brokerConsumerMap = [:]
     private List<Broker> brokers = []
     private AbstractMap<TopicPartition, List<zk.ConsumerOffset>> consumersMap
     private List<Closure> onDelta = []
@@ -31,8 +36,9 @@ class KafkaPoller extends Thread {
     }
 
     void run() {
+        logger.info("Starting wait loop")
         while (keepRunning) {
-            println 'kafka poll'
+            logger.debug("poll loop")
 
             if (shouldReconnect) {
                 reconnect()
@@ -46,8 +52,10 @@ class KafkaPoller extends Thread {
         }
     }
 
+    synchronized
     void dumpMetadata() {
-        println 'dumping'
+        logger.debug("dumping meta-data")
+
         def topics = this.consumersMap.keySet().collect { TopicPartition k -> k.topic }
         def metadata = ClientUtils.fetchTopicMetadata(toScalaSet(new HashSet(topics)),
                                                       brokersSeq,
@@ -71,7 +79,7 @@ class KafkaPoller extends Thread {
             }
         }
 
-        println 'dumped'
+        logger.debug("finished dumping meta-data")
     }
 
 
@@ -90,7 +98,7 @@ class KafkaPoller extends Thread {
      * Blocking reconnect to the Kafka brokers
      */
     void reconnect() {
-        println "reconnecting"
+        logger.info("Creating SimpleConsumer connections for brokers")
         this.brokers.each { Broker b ->
             SimpleConsumer consumer = new SimpleConsumer(b.host,
                                                          b.port,

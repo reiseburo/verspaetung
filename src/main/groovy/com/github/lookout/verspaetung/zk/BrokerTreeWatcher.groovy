@@ -11,6 +11,8 @@ import org.apache.curator.framework.recipes.cache.ChildData
 import org.apache.curator.framework.recipes.cache.TreeCache
 import org.apache.curator.framework.recipes.cache.TreeCacheListener
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * The BrokerTreeWatcher is a kind of watcher whose sole purpose is
@@ -21,6 +23,7 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent
 class BrokerTreeWatcher implements TreeCacheListener {
     static final Integer INVALID_BROKER_ID = -1
 
+    private final Logger logger = LoggerFactory.getLogger(BrokerTreeWatcher.class)
     private JsonSlurper json
     private TreeCache cache
     private final String BROKERS_PATH = '/brokers/ids'
@@ -61,7 +64,6 @@ class BrokerTreeWatcher implements TreeCacheListener {
         }
 
         if (event.type != TreeCacheEvent.Type.NODE_ADDED) {
-            println event
             return
         }
 

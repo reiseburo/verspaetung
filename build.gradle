@@ -55,6 +55,9 @@ dependencies {
 
     compile 'com.timgroup:java-statsd-client:3.0.1+'
 
+    /* Logback is to be used for logging through the app */
+    compile 'ch.qos.logback:logback-classic:1.1.2+'
+
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
     testCompile 'cglib:cglib-nodep:2.2.+'
 }

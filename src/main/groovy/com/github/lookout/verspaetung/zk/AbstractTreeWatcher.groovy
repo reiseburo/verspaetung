@@ -8,6 +8,8 @@ import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
 import org.apache.curator.framework.recipes.cache.TreeCacheListener
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * AbstractTreeWatcher defines the contract and base components for the various
@@ -19,10 +21,12 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent
 abstract class AbstractTreeWatcher implements TreeCacheListener {
     protected AbstractMap<TopicPartition, List<ConsumerOffset>> consumersMap
     protected List<Closure> onInitComplete
+    protected Logger logger
 
     AbstractTreeWatcher(AbstractMap consumers) {
         this.consumersMap = consumers
         this.onInitComplete = []
+        this.logger = LoggerFactory.getLogger(this.class)
     }
 
     /**

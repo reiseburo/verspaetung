@@ -7,19 +7,22 @@ import java.util.concurrent.ConcurrentHashMap
 import groovy.transform.TypeChecked
 
 import com.timgroup.statsd.StatsDClient
-import com.timgroup.statsd.NonBlockingStatsDClient
+import com.timgroup.statsd.NonBlockingDogStatsDClient
 
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.TreeCache
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 //@TypeChecked
 class Main {
-    private static final StatsDClient statsd = new NonBlockingStatsDClient('verspaetung', 'localhost', 8125)
+    private static final StatsDClient statsd = new NonBlockingDogStatsDClient('verspaetung', '10.32.2.211', 8125)
+    private static final Logger logger = LoggerFactory.getLogger(Main.class)
 
     static void main(String[] args) {
-        println "Running ${args}"
+        logger.info("Running with: ${args}")
 
         ExponentialBackoffRetry retry = new ExponentialBackoffRetry(1000, 3)
         CuratorFramework client = CuratorFrameworkFactory.newClient(args[0], retry)
@@ -32,7 +35,7 @@ class Main {
         KafkaPoller poller = new KafkaPoller(consumers)
         StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(consumers)
         consumerWatcher.onInitComplete << {
-            println "standard consumers initialized to ${consumers.size()} (topic, partition) tuples"
+            logger.info("standard consumers initialized to ${consumers.size()} (topic, partition) tuples")
         }
 
         BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client)
@@ -43,17 +46,22 @@ class Main {
         cache.listenable.addListener(consumerWatcher)
 
         poller.onDelta << { String groupName, TopicPartition tp, Long delta ->
-            statsd.recordGaugeValue("${tp.topic}.${tp.partition}.${groupName}", delta)
+            statsd.recordGaugeValue(tp.topic, delta, [
+                                                        'topic' : tp.topic,
+                                                        'partition' : tp.partition,
+                                                        'consumer-group' : groupName
+                ])
         }
 
         poller.start()
         brokerWatcher.start()
         cache.start()
-        println 'started..'
+
+        logger.info("Started wait loop...")
 
         while (true) { Thread.sleep(1000) }
 
-        println 'exiting..'
+        logger.info("exiting..")
         poller.die()
         poller.join()
         return
