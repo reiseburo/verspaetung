@@ -38,10 +38,11 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
     abstract String zookeeperPath()
 
     /**
-     * Start our internal cache
+     * Start our internal cache and return ourselves for API cleanliness
      */
-    void start() {
+    AbstractTreeWatcher start() {
         this.cache?.start()
+        return this
     }
 
     abstract void childEvent(CuratorFramework client, TreeCacheEvent event)

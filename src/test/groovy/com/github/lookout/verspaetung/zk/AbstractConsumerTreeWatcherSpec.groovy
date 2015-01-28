@@ -17,6 +17,7 @@ class AbstractConsumerTreeWatcherSpec extends Specification {
         }
         ConsumerOffset  processChildData(ChildData d) { }
         String zookeeperPath() { return '/zk/spock' }
+        Boolean isOffsetSubtree(String p) { return true }
     }
 
     def setup() {

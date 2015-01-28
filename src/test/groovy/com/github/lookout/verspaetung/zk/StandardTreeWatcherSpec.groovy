@@ -14,11 +14,6 @@ class StandardTreeWatcherSpec extends Specification {
         this.watcher = new StandardTreeWatcher(this.mockCurator, [:])
     }
 
-    def "processChildData should return null if null is given"() {
-        expect:
-        watcher.processChildData(null) == null
-    }
-
     def "processChildData should return null if the path is invalid"() {
         given:
         ChildData data = new ChildData("/consumers", null, (byte[])[48])

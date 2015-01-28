@@ -13,26 +13,13 @@ import org.apache.curator.framework.recipes.cache.ChildData
 class StandardTreeWatcher extends AbstractConsumerTreeWatcher {
     private static final String ZK_PATH = '/consumers'
 
-    String zookeeperPath() {
-        return ZK_PATH
-    }
+    String zookeeperPath() { return ZK_PATH }
 
     /**
      * Extract the necessary information from a standard (i.e. high-level Kafka
      * consumer) tree of offsets
      */
     ConsumerOffset processChildData(ChildData data) {
-        if (data == null) {
-            return null
-        }
-
-        /* There are non-offset related subtrees in /consumers that we don't
-         * care about, let's just skip over them
-         */
-        if (!isOffsetSubtree(data.path)) {
-            return null
-        }
-
         /*
 ChildData{path='/consumers/offtopic-spock-test/offsets/topic/7', stat=8595174473,8595174478,1416808804928,1416808805262,1,0,0,0,1,0,8595174473, data=[48]}
         */

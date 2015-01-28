@@ -25,6 +25,11 @@ abstract class AbstractConsumerTreeWatcher extends AbstractTreeWatcher {
     abstract ConsumerOffset processChildData(ChildData data)
 
     /**
+     * Determine whether a given path is of interest, i.e. path which contains
+     * offset data
+     */
+    abstract Boolean isOffsetSubtree(String path)
+    /**
      * Primary TreeCache event processing callback
      */
     void childEvent(CuratorFramework client, TreeCacheEvent event) {
@@ -36,6 +41,11 @@ abstract class AbstractConsumerTreeWatcher extends AbstractTreeWatcher {
 
         /* bail out early if we don't care about the event */
         if (!isNodeEvent(event)) {
+            return
+        }
+
+        if ((event.data == null) ||
+            (!isOffsetSubtree(event.data?.path))) {
             return
         }
 

@@ -1,6 +1,7 @@
 package com.github.lookout.verspaetung
 
 import com.github.lookout.verspaetung.zk.BrokerTreeWatcher
+import com.github.lookout.verspaetung.zk.KafkaSpoutTreeWatcher
 import com.github.lookout.verspaetung.zk.StandardTreeWatcher
 
 import java.util.AbstractMap
@@ -56,9 +57,16 @@ class Main {
         client.start()
 
         KafkaPoller poller = setupKafkaPoller(consumers, statsd, cli.hasOption('n'))
-        BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client)
-        StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(client, consumers)
+        BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client).start()
+        StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(client, consumers).start()
 
+        /* Assuming that most people aren't needing to run Storm-based watchers
+         * as well
+         */
+        if (cli.hasOption('s')) {
+            KafkaSpoutTreeWatcher stormWatcher = new KafkaSpoutTreeWatcher(client, consumers)
+            stormWatcher.start()
+        }
 
         consumerWatcher.onInitComplete << {
             logger.info("standard consumers initialized to ${consumers.size()} (topic, partition) tuples")
@@ -67,9 +75,6 @@ class Main {
         brokerWatcher.onBrokerUpdates << { brokers ->
             poller.refresh(brokers)
         }
-
-        brokerWatcher.start()
-        consumerWatcher.start()
 
         logger.info("Started wait loop...")
 
@@ -139,10 +144,15 @@ class Main {
                                      .withLongOpt('dry-run')
                                      .create('n')
 
+        Option stormSpouts = OptionBuilder.withDescription('Watch Storm KafkaSpout offsets (under /kafka_spout)')
+                                          .withLongOpt('storm')
+                                          .create('s')
+
         options.addOption(zookeeper)
         options.addOption(statsdHost)
         options.addOption(statsdPort)
         options.addOption(dryRun)
+        options.addOption(stormSpouts)
 
         return options
     }
