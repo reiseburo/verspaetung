@@ -14,6 +14,14 @@ class KafkaSpoutTreeWatcherSpec extends Specification {
         this.watcher = new KafkaSpoutTreeWatcher(this.mockCurator, [:])
     }
 
+    def "consumerNameFromPath() should give the right name for a valid path"() {
+        given:
+        String path = '/kafka_spout/spock-topology/partition_1'
+
+        expect:
+        watcher.consumerNameFromPath(path) == 'spock-topology'
+    }
+
     def "isOffsetSubtree should return true for a valid subtree path"() {
         given:
         String path = '/kafka_spout/spock-topology/partition_1'

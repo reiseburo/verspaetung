@@ -35,7 +35,7 @@ class KafkaSpoutTreeWatcher extends AbstractConsumerTreeWatcher {
         [broker:[host:REDACTED, port:6667], offset:179, partition:7, topic:device_data, topology:[id:01c0d1fc-e956-4b35-9891-dd835488cf45, name:unwrap_topology]]
         */
         ConsumerOffset offset = new ConsumerOffset()
-        offset.groupName = offsetData.topology.name
+        offset.groupName = consumerNameFromPath(nodeData.path)
         offset.topic = offsetData.topic
         offset.partition = offsetData.partition
         offset.offset = offsetData.offset
@@ -49,5 +49,15 @@ class KafkaSpoutTreeWatcher extends AbstractConsumerTreeWatcher {
     */
     Boolean isOffsetSubtree(String path) {
         return (path =~ /\/kafka_spout\/(.*)\/partition_(\d+)/)
+    }
+
+    /**
+     * Extract the given name for a KafkaSpout consumer based on the path in
+     * Zookeeper
+     */
+    String consumerNameFromPath(String path) {
+        List<String> pieces = path.split(/\//) as List<String>
+
+        return pieces[2]
     }
 }
