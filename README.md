@@ -3,6 +3,8 @@
 [![Build
 Status](https://travis-ci.org/lookout/verspaetung.svg)](https://travis-ci.org/lookout/verspaetung)
 
+[ ![Download](https://api.bintray.com/packages/lookout/systems/verspaetung/images/download.svg) ](https://bintray.com/lookout/systems/verspaetung/_latestVersion)
+
 Verspätung is a small utility which aims to help identify delay of
 [Kafka](http://kafka.apache.org) consumers.
 
