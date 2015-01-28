@@ -10,7 +10,7 @@ import org.apache.curator.framework.recipes.cache.ChildData
  */
 @TypeChecked
 @InheritConstructors
-class StandardTreeWatcher extends AbstractTreeWatcher {
+class StandardTreeWatcher extends AbstractConsumerTreeWatcher {
     private static final String ZK_PATH = '/consumers'
 
     String zookeeperPath() {

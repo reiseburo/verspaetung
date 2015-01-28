@@ -20,36 +20,34 @@ import org.slf4j.LoggerFactory
  * information
  */
 @TypeChecked
-class BrokerTreeWatcher implements TreeCacheListener {
+class BrokerTreeWatcher extends AbstractTreeWatcher {
     static final Integer INVALID_BROKER_ID = -1
+    private static final String BROKERS_PATH = '/brokers/ids'
 
     private final Logger logger = LoggerFactory.getLogger(BrokerTreeWatcher.class)
     private JsonSlurper json
-    private TreeCache cache
-    private final String BROKERS_PATH = '/brokers/ids'
     private List<Closure> onBrokerUpdates
     private Boolean isTreeInitialized = false
     private List<KafkaBroker> brokers
 
     BrokerTreeWatcher(CuratorFramework client) {
+        super(client)
+
         this.json = new JsonSlurper()
-        this.cache = new TreeCache(client, BROKERS_PATH)
-        this.cache.listenable.addListener(this)
         this.brokers = []
         this.onBrokerUpdates = []
     }
 
-    /**
-     * Start our internal cache
-     */
-    void start() {
-        this.cache?.start()
+
+    String zookeeperPath() {
+        return BROKERS_PATH
     }
 
     /**
      * Process events like NODE_ADDED and NODE_REMOVED to keep an up to date
      * list of brokers
      */
+    @Override
     void childEvent(CuratorFramework client, TreeCacheEvent event) {
         /* If we're initialized that means we should have all our brokers in
          * our internal list already and we can fire an event
