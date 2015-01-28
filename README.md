@@ -14,6 +14,23 @@ that they have committed to Zookeeper. Using both of these pieces of
 information, Verspätung computs the delta for each of the consumer groups and
 reports it to statsd.
 
+### Using
+
+```
+% java -jar verspaetung-0.1.4-all.jar --help
+usage: verspaetung
+ -H,--statsd-host <STATSD>   Hostname for a statsd instance (defaults to
+                             localhost)
+ -n,--dry-run                Disable reporting to a statsd host
+ -p,--statsd-port <PORT>     Port for the statsd instance (defaults to
+                             8125)
+ -s,--storm                  Watch Storm KafkaSpout offsets (under
+                             /kafka_spout)
+ -z,--zookeeper <HOSTS>      Comma separated list of Zookeeper hosts (e.g.
+                             localhost:2181)
+```
+
+Running Verspätung is rather easy, by default the daemon will monitor the standard Kafka high-level consumer offset path of `/consumers` and start reporting deltas automatically.
 
 ### Hacking
 
