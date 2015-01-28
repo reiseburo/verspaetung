@@ -7,6 +7,7 @@ import groovy.transform.TypeChecked
 
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
+import org.apache.curator.framework.recipes.cache.TreeCache
 import org.apache.curator.framework.recipes.cache.TreeCacheListener
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent
 import org.slf4j.Logger
@@ -23,17 +24,36 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
     protected AbstractMap<TopicPartition, List<ConsumerOffset>> consumersMap
     protected List<Closure> onInitComplete
     protected Logger logger
+    protected CuratorFramework client
+    protected TreeCache cache
 
-    AbstractTreeWatcher(AbstractMap consumers) {
+    AbstractTreeWatcher(CuratorFramework client, AbstractMap consumers) {
+        this.client = client
         this.consumersMap = consumers
         this.onInitComplete = []
         this.logger = LoggerFactory.getLogger(this.class)
+
+        this.cache = new TreeCache(client, zookeeperPath())
+        this.cache.listenable.addListener(this)
     }
 
     /**
      * Process the ChildData associated with an event
      */
     abstract ConsumerOffset processChildData(ChildData data)
+
+    /**
+     * Return the String of the path in Zookeeper this class should watch. This
+     * method must be safe to call from the initializer of the class
+     */
+    abstract String zookeeperPath()
+
+    /**
+     * Start our internal cache
+     */
+    void start() {
+        this.cache?.start()
+    }
 
     /**
      * Primary TreeCache event processing callback

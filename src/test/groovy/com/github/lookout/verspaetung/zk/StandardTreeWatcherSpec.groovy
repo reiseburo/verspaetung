@@ -2,13 +2,16 @@ package com.github.lookout.verspaetung.zk
 
 import spock.lang.*
 
+import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
 
 class StandardTreeWatcherSpec extends Specification {
     private StandardTreeWatcher watcher
+    private CuratorFramework mockCurator
 
     def setup() {
-        this.watcher = new StandardTreeWatcher([:])
+        this.mockCurator = Mock(CuratorFramework)
+        this.watcher = new StandardTreeWatcher(this.mockCurator, [:])
     }
 
     def "processChildData should return null if null is given"() {

@@ -11,9 +11,11 @@ class AbstractTreeWatcherSpec extends Specification {
 
     class MockWatcher extends AbstractTreeWatcher {
         MockWatcher() {
-            super([:])
+            super(null, [:])
         }
         ConsumerOffset processChildData(ChildData d) { }
+
+        String zookeeperPath() { return '/zk/spock' }
     }
 
     def setup() {

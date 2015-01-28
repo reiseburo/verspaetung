@@ -55,10 +55,9 @@ class Main {
 
         client.start()
 
-        TreeCache cache = new TreeCache(client, '/consumers')
         KafkaPoller poller = setupKafkaPoller(consumers, statsd, cli.hasOption('n'))
         BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client)
-        StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(consumers)
+        StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(client, consumers)
 
 
         consumerWatcher.onInitComplete << {
@@ -69,10 +68,8 @@ class Main {
             poller.refresh(brokers)
         }
 
-        cache.listenable.addListener(consumerWatcher)
-
         brokerWatcher.start()
-        cache.start()
+        consumerWatcher.start()
 
         logger.info("Started wait loop...")
 

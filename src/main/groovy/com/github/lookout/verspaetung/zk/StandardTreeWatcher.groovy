@@ -11,6 +11,11 @@ import org.apache.curator.framework.recipes.cache.ChildData
 @TypeChecked
 @InheritConstructors
 class StandardTreeWatcher extends AbstractTreeWatcher {
+    private static final String ZK_PATH = '/consumers'
+
+    String zookeeperPath() {
+        return ZK_PATH
+    }
 
     /**
      * Extract the necessary information from a standard (i.e. high-level Kafka
