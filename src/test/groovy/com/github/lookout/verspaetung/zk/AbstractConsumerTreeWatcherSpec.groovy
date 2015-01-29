@@ -82,6 +82,13 @@ class AbstractConsumerTreeWatcherSpec extends Specification {
         then:
         watcher.consumersMap.size() == 1
         watcher.consumersMap[mapKey].size() == 2
+    }
 
+
+    @Ignore
+    def "removeConsumer() should remove a ConsumerOffset from the map"() {
+        given:
+        TopicPartition tp = new TopicPartition('spock', 1)
+        ConsumerOffset consumer = new ConsumerOffset()
     }
 }
