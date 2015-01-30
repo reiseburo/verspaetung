@@ -57,6 +57,10 @@ dependencies {
 
     compile 'com.timgroup:java-statsd-client:3.1.2+'
 
+    ['metrics-core', 'metrics-graphite'].each { artifactName ->
+        compile "io.dropwizard.metrics:${artifactName}:3.1.0"
+    }
+
     /* Logback is to be used for logging through the app */
     compile 'ch.qos.logback:logback-classic:1.1.2+'
 
