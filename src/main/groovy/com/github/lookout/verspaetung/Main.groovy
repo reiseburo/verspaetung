@@ -26,6 +26,7 @@ class Main {
     private static Logger logger
 
     static void main(String[] args) {
+        String statsdPrefix = METRICS_PREFIX
         String zookeeperHosts = 'localhost:2181'
         String statsdHost = 'localhost'
         Integer statsdPort = 8125
@@ -48,11 +49,15 @@ class Main {
         logger.info("Running with: ${args}")
         logger.warn("Using: zookeepers=${zookeeperHosts} statsd=${statsdHost}:${statsdPort}")
 
+        if (cli.hasOption('prefix')) {
+            statsdPrefix = "${cli.getOptionValue('prefix')}.${METRICS_PREFIX}"
+        }
+
         ExponentialBackoffRetry retry = new ExponentialBackoffRetry(1000, 3)
         CuratorFramework client = CuratorFrameworkFactory.newClient(zookeeperHosts, retry)
         ConcurrentHashMap<TopicPartition, List<zk.ConsumerOffset>> consumers = new ConcurrentHashMap()
 
-        statsd = new NonBlockingDogStatsDClient(METRICS_PREFIX, statsdHost, statsdPort)
+        statsd = new NonBlockingDogStatsDClient(statsdPrefix, statsdHost, statsdPort)
 
         client.start()
 
@@ -148,9 +153,17 @@ class Main {
                                           .withLongOpt('storm')
                                           .create('s')
 
+        Option statsdPrefix = OptionBuilder.withArgName('PREFIX')
+                                           .hasArg()
+                                           .withType(String)
+                                           .withDescription("Prefix all metrics with PREFIX before they're reported (e.g. PREFIX.verspaetung.mytopic)")
+                                           .withLongOpt('prefix')
+                                           .create()
+
         options.addOption(zookeeper)
         options.addOption(statsdHost)
         options.addOption(statsdPort)
+        options.addOption(statsdPrefix)
         options.addOption(dryRun)
         options.addOption(stormSpouts)
 
