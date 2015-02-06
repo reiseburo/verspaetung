@@ -11,7 +11,7 @@ class KafkaSpoutTreeWatcherSpec extends Specification {
 
     def setup() {
         this.mockCurator = Mock(CuratorFramework)
-        this.watcher = new KafkaSpoutTreeWatcher(this.mockCurator, [:])
+        this.watcher = new KafkaSpoutTreeWatcher(this.mockCurator, new HashSet(), [:])
     }
 
     def "consumerNameFromPath() should give the right name for a valid path"() {

@@ -7,7 +7,7 @@ apply plugin: 'application'
 
 group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.1.5'
+version = '0.1.6'
 mainClassName = 'com.github.lookout.verspaetung.Main'
 defaultTasks 'clean', 'check'
 sourceCompatibility = '1.7'

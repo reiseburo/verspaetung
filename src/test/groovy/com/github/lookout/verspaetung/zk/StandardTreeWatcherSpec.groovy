@@ -11,7 +11,7 @@ class StandardTreeWatcherSpec extends Specification {
 
     def setup() {
         this.mockCurator = Mock(CuratorFramework)
-        this.watcher = new StandardTreeWatcher(this.mockCurator, [:])
+        this.watcher = new StandardTreeWatcher(this.mockCurator, new HashSet(), [:])
     }
 
     def "processChildData should return null if the path is invalid"() {

@@ -1,5 +1,6 @@
 package com.github.lookout.verspaetung.zk
 
+import com.github.lookout.verspaetung.KafkaConsumer
 import com.github.lookout.verspaetung.TopicPartition
 
 import java.util.concurrent.CopyOnWriteArrayList
@@ -11,12 +12,16 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent
 
 @TypeChecked
 abstract class AbstractConsumerTreeWatcher extends AbstractTreeWatcher {
-    protected AbstractMap<TopicPartition, List<ConsumerOffset>> consumersMap
+    protected AbstractMap<KafkaConsumer, Integer> consumerOffsets
+    protected AbstractSet<String> watchedTopics
+    protected List<Closure> onConsumerData = []
 
     AbstractConsumerTreeWatcher(CuratorFramework client,
-                                AbstractMap consumersMap) {
+                                AbstractSet topics,
+                                AbstractMap offsets) {
         super(client)
-        this.consumersMap = consumersMap
+        this.watchedTopics = topics
+        this.consumerOffsets = offsets
     }
 
     /**
@@ -61,17 +66,18 @@ abstract class AbstractConsumerTreeWatcher extends AbstractTreeWatcher {
      * this class on instantiation
      */
     void trackConsumerOffset(ConsumerOffset offset) {
-        if (this.consumersMap == null) {
+        if (this.consumerOffsets == null) {
             return
         }
 
-        TopicPartition key = new TopicPartition(offset.topic, offset.partition)
+        this.watchedTopics << offset.topic
+        KafkaConsumer consumer = new KafkaConsumer(offset.topic,
+                                                    offset.partition,
+                                                    offset.groupName)
+        this.consumerOffsets[consumer] = offset.offset
 
-        if (this.consumersMap.containsKey(key)) {
-            this.consumersMap[key] << offset
-        }
-        else {
-            this.consumersMap[key] = new CopyOnWriteArrayList([offset])
+        this.onConsumerData.each { Closure c ->
+            c.call(consumer)
         }
     }
 

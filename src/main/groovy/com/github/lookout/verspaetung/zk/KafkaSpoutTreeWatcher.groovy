@@ -17,8 +17,10 @@ class KafkaSpoutTreeWatcher extends AbstractConsumerTreeWatcher {
     private static final String ZK_PATH = '/kafka_spout'
     private JsonSlurper json
 
-    KafkaSpoutTreeWatcher(CuratorFramework client, AbstractMap consumersMap) {
-        super(client, consumersMap)
+    KafkaSpoutTreeWatcher(CuratorFramework client,
+                          AbstractSet topics,
+                          AbstractMap offsets) {
+        super(client, topics, offsets)
 
         this.json = new JsonSlurper()
     }

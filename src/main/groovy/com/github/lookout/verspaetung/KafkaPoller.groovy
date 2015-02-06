@@ -28,12 +28,14 @@ class KafkaPoller extends Thread {
     private Boolean keepRunning = true
     private Boolean shouldReconnect = false
     private ConcurrentHashMap<Integer, SimpleConsumer> brokerConsumerMap
-    private AbstractMap<TopicPartition, List<zk.ConsumerOffset>> consumersMap
+    private AbstractMap<TopicPartition, Long> topicOffsetMap
     private List<Broker> brokers
     private List<Closure> onDelta
+    private AbstractSet<String> currentTopics
 
-    KafkaPoller(AbstractMap map) {
-        this.consumersMap = map
+    KafkaPoller(AbstractMap map, AbstractSet topicSet) {
+        this.topicOffsetMap = map
+        this.currentTopics = topicSet
         this.brokerConsumerMap = [:]
         this.brokers = []
         this.onDelta = []
@@ -49,7 +51,10 @@ class KafkaPoller extends Thread {
                 reconnect()
             }
 
-            if (this.consumersMap.size() > 0) {
+            /* Only makes sense to try to dump meta-data if we've got some
+             * topics that we should keep an eye on
+             */
+            if (this.currentTopics.size() > 0) {
                 dumpMetadata()
             }
 
@@ -64,10 +69,10 @@ class KafkaPoller extends Thread {
 
         withTopicsAndPartitions(metadata) { tp, p ->
             try {
-                processDeltasFor(tp, p)
+                captureLatestOffsetFor(tp, p)
             }
             catch (Exception ex) {
-                logger.error("Failed to process deltas for ${tp.topic}:${tp.partition}", ex)
+                logger.error("Failed to fetch latest for ${tp.topic}:${tp.partition}", ex)
             }
         }
 
@@ -92,23 +97,15 @@ class KafkaPoller extends Thread {
 
 
     /**
-     * Fetch the leader metadata and invoke our callbacks with the right deltas
-     * for the given topic and partition information
+     * Fetch the leader metadata and update our data structures
      */
-    void processDeltasFor(TopicPartition tp, Object partitionMetadata) {
+    void captureLatestOffsetFor(TopicPartition tp, Object partitionMetadata) {
         Integer leaderId = partitionMetadata.leader.get()?.id
         Integer partitionId = partitionMetadata.partitionId
 
         Long offset = latestFromLeader(leaderId, tp.topic, partitionId)
 
-        this.consumersMap[tp].each { zk.ConsumerOffset c ->
-            logger.debug("Values for ${c.groupName} on ${tp.topic}:${tp.partition}: ${offset} - ${c.offset}")
-
-            Long delta = offset - c.offset
-            this.onDelta.each { Closure callback ->
-                callback.call(c.groupName, tp, delta)
-            }
-        }
+        this.topicOffsetMap[tp] = offset
     }
 
     Long latestFromLeader(Integer leaderId, String topic, Integer partition) {
@@ -160,14 +157,6 @@ class KafkaPoller extends Thread {
     }
 
     /**
-     * Collect all the topics from our given consumer map and return a list of
-     * them
-     */
-    private List<String> collectCurrentTopics() {
-        return this.consumersMap.keySet().collect { TopicPartition k -> k.topic }
-    }
-
-    /**
      * Return the brokers list as an immutable Seq collection for the Kafka
      * scala underpinnings
      */
@@ -185,7 +174,7 @@ class KafkaPoller extends Thread {
 
     private Object fetchMetadataForCurrentTopics() {
         return ClientUtils.fetchTopicMetadata(
-                            toScalaSet(new HashSet(collectCurrentTopics())),
+                            toScalaSet(currentTopics),
                             brokersSeq,
                             KAFKA_CLIENT_ID,
                             KAFKA_TIMEOUT,
