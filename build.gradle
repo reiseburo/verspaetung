@@ -7,7 +7,7 @@ apply plugin: 'application'
 
 group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.1.5'
+version = '0.1.6'
 mainClassName = 'com.github.lookout.verspaetung.Main'
 defaultTasks 'clean', 'check'
 sourceCompatibility = '1.7'
@@ -35,6 +35,7 @@ repositories {
     jcenter()
 
     maven { url 'https://dl.bintray.com/rtyler/maven' }
+    maven { url 'https://dl.bintray.com/lookout/systems' }
 }
 
 dependencies {
@@ -55,7 +56,11 @@ dependencies {
     /* Needed for command line options parsing */
     compile 'commons-cli:commons-cli:1.2+'
 
-    compile 'com.timgroup:java-statsd-client:3.1.2+'
+    compile 'com.github.lookout:metrics-datadog:0.1.3'
+
+    ['metrics-core', 'metrics-graphite'].each { artifactName ->
+        compile "io.dropwizard.metrics:${artifactName}:3.1.0"
+    }
 
     /* Logback is to be used for logging through the app */
     compile 'ch.qos.logback:logback-classic:1.1.2+'

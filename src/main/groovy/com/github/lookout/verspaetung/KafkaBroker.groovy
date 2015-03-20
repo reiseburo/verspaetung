@@ -8,7 +8,7 @@ class KafkaBroker {
     private Integer port
     private Integer brokerId
 
-    public KafkaBroker(Object jsonObject, Integer brokerId) {
+    KafkaBroker(Object jsonObject, Integer brokerId) {
         this.host = jsonObject.host
         this.port = jsonObject.port
         this.brokerId = brokerId

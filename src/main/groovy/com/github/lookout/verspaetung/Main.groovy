@@ -3,27 +3,33 @@ package com.github.lookout.verspaetung
 import com.github.lookout.verspaetung.zk.BrokerTreeWatcher
 import com.github.lookout.verspaetung.zk.KafkaSpoutTreeWatcher
 import com.github.lookout.verspaetung.zk.StandardTreeWatcher
+import com.github.lookout.verspaetung.metrics.ConsumerGauge
 
 import java.util.AbstractMap
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentSkipListSet
+import java.util.concurrent.TimeUnit
 import groovy.transform.TypeChecked
-
-import com.timgroup.statsd.StatsDClient
-import com.timgroup.statsd.NonBlockingDogStatsDClient
 
 import org.apache.commons.cli.*
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.TreeCache
+import org.coursera.metrics.datadog.DatadogReporter
+import org.coursera.metrics.datadog.transport.UdpTransport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import com.codahale.metrics.*
+
 
 class Main {
     private static final String METRICS_PREFIX = 'verspaetung'
 
-    private static StatsDClient statsd
     private static Logger logger
+    private static ScheduledReporter reporter
+    private static final MetricRegistry registry = new MetricRegistry()
 
     static void main(String[] args) {
         String statsdPrefix = METRICS_PREFIX
@@ -53,74 +59,115 @@ class Main {
             statsdPrefix = "${cli.getOptionValue('prefix')}.${METRICS_PREFIX}"
         }
 
+
+        registry.register(MetricRegistry.name(Main.class, 'heartbeat'),
+                            new metrics.HeartbeatGauge())
+
         ExponentialBackoffRetry retry = new ExponentialBackoffRetry(1000, 3)
         CuratorFramework client = CuratorFrameworkFactory.newClient(zookeeperHosts, retry)
-        ConcurrentHashMap<TopicPartition, List<zk.ConsumerOffset>> consumers = new ConcurrentHashMap()
-
-        statsd = new NonBlockingDogStatsDClient(statsdPrefix, statsdHost, statsdPort)
-
         client.start()
 
-        KafkaPoller poller = setupKafkaPoller(consumers, statsd, cli.hasOption('n'))
+        /* We need a good shared set of all the topics we should keep an eye on
+         * for the Kafka poller. This will be written to by the tree watchers
+         * and read from by the poller, e.g.
+         *      Watcher --/write/--> watchedTopics --/read/--> KafkaPoller
+         */
+        ConcurrentSkipListSet<String> watchedTopics = new ConcurrentSkipListSet<>()
+
+        /* consumerOffsets is where we will keep all the offsets from Zookeeper
+         * from the Kafka consumers
+         */
+        ConcurrentHashMap<KafkaConsumer, Integer> consumerOffsets = new ConcurrentHashMap<>()
+
+        /* topicOffsets is where the KafkaPoller should be writing all of it's
+         * latest offsets from querying the Kafka brokers
+         */
+        ConcurrentHashMap<TopicPartition, Long> topicOffsets = new ConcurrentHashMap<>()
+
+        /* Hash map for keeping track of KafkaConsumer to ConsumerGauge
+         * instances. We're only really doing this because the MetricRegistry
+         * doesn't do a terrific job of exposing this for us
+         */
+        ConcurrentHashMap<KafkaConsumer, ConsumerGauge> consumerGauges = new ConcurrentHashMap<>()
+
+
+        KafkaPoller poller = new KafkaPoller(topicOffsets, watchedTopics)
         BrokerTreeWatcher brokerWatcher = new BrokerTreeWatcher(client).start()
-        StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(client, consumers).start()
+        brokerWatcher.onBrokerUpdates << { brokers -> poller.refresh(brokers) }
+
+        poller.start()
+
+        /* Need to reuse this closure for the KafkaSpoutTreeWatcher if we have
+         * one
+         */
+        Closure gaugeRegistrar = { KafkaConsumer consumer ->
+            registerMetricFor(consumer, consumerGauges, consumerOffsets, topicOffsets)
+        }
+
+        StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(client,
+                                                                      watchedTopics,
+                                                                      consumerOffsets)
+        consumerWatcher.onConsumerData << gaugeRegistrar
+        consumerWatcher.start()
+
 
         /* Assuming that most people aren't needing to run Storm-based watchers
          * as well
          */
         if (cli.hasOption('s')) {
-            KafkaSpoutTreeWatcher stormWatcher = new KafkaSpoutTreeWatcher(client, consumers)
+            KafkaSpoutTreeWatcher stormWatcher = new KafkaSpoutTreeWatcher(client,
+                                                                           watchedTopics,
+                                                                           consumerOffsets)
+            stormWatcher.onConsumerData << gaugeRegistrar
             stormWatcher.start()
         }
 
-        consumerWatcher.onInitComplete << {
-            logger.info("standard consumers initialized to ${consumers.size()} (topic, partition) tuples")
+
+        if (cli.hasOption('n')) {
+            reporter = ConsoleReporter.forRegistry(registry)
+                                      .convertRatesTo(TimeUnit.SECONDS)
+                                      .convertDurationsTo(TimeUnit.MILLISECONDS)
+                                      .build()
+        }
+        else {
+            UdpTransport transport = new UdpTransport.Builder()
+                                                     .withPrefix(statsdPrefix)
+                                                     .build()
+
+            reporter = DatadogReporter.forRegistry(registry)
+                                      .withEC2Host()
+                                      .withTransport(transport)
+                                      .build()
         }
 
-        brokerWatcher.onBrokerUpdates << { brokers ->
-            poller.refresh(brokers)
+        /* Start the reporter if we've got it */
+        reporter?.start(1, TimeUnit.SECONDS)
+
+        logger.info("Starting wait loop...")
+        synchronized(this) {
+            wait()
+        }
+    }
+
+    static void registerMetricFor(KafkaConsumer consumer,
+                                  ConcurrentHashMap<KafkaConsumer, ConsumerGauge> consumerGauges,
+                                  ConcurrentHashMap<KafkaConsumer, Integer> consumerOffsets,
+                                  ConcurrentHashMap<TopicPartition, Long> topicOffsets) {
+        if (consumerGauges.containsKey(consumer)) {
+            return
         }
 
-        logger.info("Started wait loop...")
-
-        while (true) {
-            statsd?.recordGaugeValue('heartbeat', 1)
-            Thread.sleep(1 * 1000)
-        }
-
-        logger.info("exiting..")
-        poller.die()
-        poller.join()
-        return
+        ConsumerGauge gauge = new ConsumerGauge(consumer,
+                                                consumerOffsets,
+                                                topicOffsets)
+        consumerGauges.put(consumer, gauge)
+        this.registry.register(gauge.nameForRegistry, gauge)
     }
 
 
     /**
-     * Create and start a KafkaPoller with the given statsd and consumers map
+     * Create the Options option necessary for verspaetung to have CLI options
      */
-    static KafkaPoller setupKafkaPoller(AbstractMap consumers,
-                                        NonBlockingDogStatsDClient statsd,
-                                        Boolean dryRun)  {
-        KafkaPoller poller = new KafkaPoller(consumers)
-        Closure deltaCallback = { String name, TopicPartition tp, Long delta ->
-            println "${tp.topic}:${tp.partition}-${name} = ${delta}"
-        }
-
-        if (!dryRun) {
-            deltaCallback = { String name, TopicPartition tp, Long delta ->
-            statsd.recordGaugeValue(tp.topic, delta, [
-                                                    'topic' : tp.topic,
-                                                    'partition' : tp.partition,
-                                                    'consumer-group' : name
-                ])
-            }
-        }
-
-        poller.onDelta << deltaCallback
-        poller.start()
-        return poller
-    }
-
     static Options createCLI() {
         Options options = new Options()
 
@@ -170,6 +217,11 @@ class Main {
         return options
     }
 
+
+    /**
+     * Parse out all the command line options from the array of string
+     * arguments
+     */
     static CommandLine parseCommandLine(String[] args) {
         Options options = createCLI()
         PosixParser parser = new PosixParser()

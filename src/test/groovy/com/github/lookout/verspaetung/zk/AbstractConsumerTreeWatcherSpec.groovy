@@ -13,7 +13,7 @@ class AbstractConsumerTreeWatcherSpec extends Specification {
 
     class MockWatcher extends AbstractConsumerTreeWatcher {
         MockWatcher() {
-            super(null, [:])
+            super(null, new HashSet(), [:])
         }
         ConsumerOffset  processChildData(ChildData d) { }
         String zookeeperPath() { return '/zk/spock' }
@@ -63,10 +63,11 @@ class AbstractConsumerTreeWatcherSpec extends Specification {
         watcher.trackConsumerOffset(offset)
 
         then:
-        watcher.consumersMap.size() == 1
+        watcher.consumerOffsets.size() == 1
+        watcher.watchedTopics.size() == 1
     }
 
-    def "trackConsumerOffset() should append to a list for existing topics in the map"() {
+    def "trackConsumerOffset() append an offset but not a topic for different group names"() {
         given:
         String topic = 'spock-topic'
         TopicPartition mapKey = new TopicPartition(topic, 0)
@@ -80,8 +81,8 @@ class AbstractConsumerTreeWatcherSpec extends Specification {
         watcher.trackConsumerOffset(secondOffset)
 
         then:
-        watcher.consumersMap.size() == 1
-        watcher.consumersMap[mapKey].size() == 2
+        watcher.watchedTopics.size() == 1
+        watcher.consumerOffsets.size() == 2
     }
 
 
