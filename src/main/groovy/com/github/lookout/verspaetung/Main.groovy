@@ -16,10 +16,13 @@ import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.TreeCache
+import org.coursera.metrics.datadog.DatadogReporter
+import org.coursera.metrics.datadog.transport.UdpTransport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import com.codahale.metrics.*
+
 
 class Main {
     private static final String METRICS_PREFIX = 'verspaetung'
@@ -126,20 +129,24 @@ class Main {
                                       .convertDurationsTo(TimeUnit.MILLISECONDS)
                                       .build()
         }
+        else {
+            UdpTransport transport = new UdpTransport.Builder()
+                                                     .withPrefix(statsdPrefix)
+                                                     .build()
+
+            reporter = DatadogReporter.forRegistry(registry)
+                                      .withEC2Host()
+                                      .withTransport(transport)
+                                      .build()
+        }
 
         /* Start the reporter if we've got it */
         reporter?.start(1, TimeUnit.SECONDS)
 
         logger.info("Starting wait loop...")
-        while (true) {
-            Thread.sleep(1 * 1000)
+        synchronized(this) {
+            wait()
         }
-
-        logger.info("exiting..")
-        poller.die()
-        poller.join()
-
-        return
     }
 
     static void registerMetricFor(KafkaConsumer consumer,
@@ -153,7 +160,8 @@ class Main {
         ConsumerGauge gauge = new ConsumerGauge(consumer,
                                                 consumerOffsets,
                                                 topicOffsets)
-        this.registry.register(gauge.name, gauge)
+        consumerGauges.put(consumer, gauge)
+        this.registry.register(gauge.nameForRegistry, gauge)
     }
 
 
