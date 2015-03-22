@@ -55,7 +55,12 @@ class KafkaPoller extends Thread {
              * topics that we should keep an eye on
              */
             if (this.currentTopics.size() > 0) {
-                dumpMetadata()
+                try {
+                    dumpMetadata()
+                }
+                catch (Exception ex) {
+                    logger.error("Failed to fetch and dump Kafka metadata", ex)
+                }
             }
 
             Thread.sleep(POLLER_DELAY)
