@@ -39,7 +39,15 @@ class ConsumerGauge implements Gauge<Integer>, Tagged {
             (!this.topics.containsKey(topicPartition))) {
             return 0
         }
-        return ((Integer)this.topics[topicPartition]) - this.consumers[consumer]
+
+        /*
+         * Returning the maximum value of the computation and zero, there are
+         * some cases where we can be "behind" on the Kafka latest offset
+         * polling and this could result in an erroneous negative value. See:
+         * <https://github.com/lookout/verspaetung/issues/25> for more details
+         */
+        return Math.max(0,
+                        ((Integer)this.topics[topicPartition]) - this.consumers[consumer])
     }
 
     @Override
