@@ -1,12 +1,9 @@
-# Verspätung
+image:https://travis-ci.org/lookout/verspaetung.svg?branch=master["Build Status", link="https://travis-ci.org/lookout/verspaetung"]
 
-[![Build
-Status](https://travis-ci.org/lookout/verspaetung.svg)](https://travis-ci.org/lookout/verspaetung)
+image::https://api.bintray.com/packages/lookout/systems/verspaetung/images/download.svg[link="https://bintray.com/lookout/systems/verspaetung/_latestVersion"]
 
-[ ![Download](https://api.bintray.com/packages/lookout/systems/verspaetung/images/download.svg) ](https://bintray.com/lookout/systems/verspaetung/_latestVersion)
+Verspätung is a small utility which aims to help identify delay of link:http://kafka.apache.org[Kafka] consumers.
 
-Verspätung is a small utility which aims to help identify delay of
-[Kafka](http://kafka.apache.org) consumers.
 
 Verspätung monitors the topics and their latest offsets by talking to Kafka, it
 will also keep track of how far along consumers are by monitoring the offsets
@@ -14,7 +11,7 @@ that they have committed to Zookeeper. Using both of these pieces of
 information, Verspätung computs the delta for each of the consumer groups and
 reports it to statsd.
 
-### Using
+=== Using
 
     % java -jar verspaetung-*-all.jar --help
     usage: verspaetung
@@ -32,17 +29,16 @@ Running Verspätung is rather easy, by default the daemon will monitor the
 standard Kafka high-level consumer offset path of `/consumers` and start
 reporting deltas automatically.
 
-### Hacking
+=== Hacking
 
-* *Running tests:* `./gradlew check`
-* *Running the app locally:* `./gradlew run -PzookeeperHosts=localhost:2181`
-* *Building the app for distribution:* `./gradlew assemble`
+* Running tests: `./gradlew check`
+* Running the app locally: `./gradlew run -PzookeeperHosts=localhost:2181`
+* Building the app for distribution: `./gradlew assemble`
 
 
-### Releasing
+=== Releasing
 
 This is mostly meant for the developer team, but currently releases can be
 produced by simply pushing a Git tag to this GitHub repository. This will cause
 Travis CI to build and test the tag, which if it is successful, will
-automatically publish to
-[Bintray](https://bintray.com/lookout/systems/verspaetung).
+automatically publish to link:https://bintray.com/lookout/systems/verspaetung[Bintray].

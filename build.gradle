@@ -1,15 +1,17 @@
 plugins {
     id "com.jfrog.bintray" version "1.0"
     id 'com.github.johnrengelman.shadow' version '1.2.0'
+    id "org.ajoberstar.github-pages" version "1.2.0"
+    id "org.asciidoctor.gradle.asciidoctor" version "1.5.1"
+    id 'groovy'
+    id 'application'
 }
-apply plugin: 'groovy'
-apply plugin: 'application'
 
 group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.2.2'
+version = '0.3.0'
 mainClassName = 'com.github.lookout.verspaetung.Main'
-defaultTasks 'clean', 'check', 'assemble'
+defaultTasks 'check', 'assemble'
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,9 +72,28 @@ dependencies {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-jar {
-    enabled = false
+// PUBLISHING/DOCUMENTATION
+assemble.dependsOn groovydoc
+
+asciidoctor {
+    /* Using a single backend, so skipping the html5/ output dir */
+    separateOutputDirs false
 }
+assemble.dependsOn asciidoctor
+
+githubPages {
+    repoUri = 'git@github.com:lookout/verspaetung.git'
+    pages {
+        into('groovydoc') { from groovydoc }
+        from asciidoctor
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
 shadowJar {
     exclude 'META-INF/*.RSA', 'META-INF/*.DSA'
     manifest {
@@ -87,6 +108,8 @@ artifacts {
     archives shadowJar
 }
 
+/* We're not building a library jar so we'll disable this default jar task  */
+jar.enabled = false
 /* Remove the "library" jar from the archives configuration so it's not
  * published
  */
