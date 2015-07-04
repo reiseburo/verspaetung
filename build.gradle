@@ -7,11 +7,9 @@ apply plugin: 'application'
 
 group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.2.0'
+version = '0.2.1'
 mainClassName = 'com.github.lookout.verspaetung.Main'
-defaultTasks 'clean', 'check'
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+defaultTasks 'clean', 'check', 'assemble'
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.0+'
+    compile 'org.codehaus.groovy:groovy-all:2.4.3+'
 
     [
      'curator-framework',
@@ -94,7 +92,12 @@ bintray {
     user = project.bintrayUser
     key = project.bintrayKey
     publish = true
-    dryRun = false
+    /*
+     * Only only publish when we're tagging a release and if we've executed on
+     * the JDK7 build. This is to prevent multiple attempts by the build matrix
+     * to publish the artifacts
+     */
+    dryRun = !((System.env.TRAVIS_TAG as boolean) && (System.env.TRAVIS_JDK_VERSION == 'oraclejdk7'))
     configurations = ['archives']
 
     pkg {
