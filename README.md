@@ -16,24 +16,33 @@ reports it to statsd.
 
 ### Using
 
-```
-% java -jar verspaetung-0.1.4-all.jar --help
-usage: verspaetung
- -H,--statsd-host <STATSD>   Hostname for a statsd instance (defaults to
-                             localhost)
- -n,--dry-run                Disable reporting to a statsd host
- -p,--statsd-port <PORT>     Port for the statsd instance (defaults to
-                             8125)
- -s,--storm                  Watch Storm KafkaSpout offsets (under
-                             /kafka_spout)
- -z,--zookeeper <HOSTS>      Comma separated list of Zookeeper hosts (e.g.
-                             localhost:2181)
-```
+    % java -jar verspaetung-*-all.jar --help
+    usage: verspaetung
+     -H,--statsd-host <STATSD>   Hostname for a statsd instance (defaults to
+                                 localhost)
+     -n,--dry-run                Disable reporting to a statsd host
+     -p,--statsd-port <PORT>     Port for the statsd instance (defaults to
+                                 8125)
+     -s,--storm                  Watch Storm KafkaSpout offsets (under
+                                 /kafka_spout)
+     -z,--zookeeper <HOSTS>      Comma separated list of Zookeeper hosts (e.g.
+                                 localhost:2181)
 
-Running Verspätung is rather easy, by default the daemon will monitor the standard Kafka high-level consumer offset path of `/consumers` and start reporting deltas automatically.
+Running Verspätung is rather easy, by default the daemon will monitor the
+standard Kafka high-level consumer offset path of `/consumers` and start
+reporting deltas automatically.
 
 ### Hacking
 
 * *Running tests:* `./gradlew check`
 * *Running the app locally:* `./gradlew run -PzookeeperHosts=localhost:2181`
-* *Building the app for distribution:* `./gradlew shadowJar`
+* *Building the app for distribution:* `./gradlew assemble`
+
+
+### Releasing
+
+This is mostly meant for the developer team, but currently releases can be
+produced by simply pushing a Git tag to this GitHub repository. This will cause
+Travis CI to build and test the tag, which if it is successful, will
+automatically publish to
+[Bintray](https://bintray.com/lookout/systems/verspaetung).
