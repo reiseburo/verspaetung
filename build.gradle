@@ -7,7 +7,7 @@ apply plugin: 'application'
 
 group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.2.1'
+version = '0.2.2'
 mainClassName = 'com.github.lookout.verspaetung.Main'
 defaultTasks 'clean', 'check', 'assemble'
 
@@ -86,6 +86,11 @@ assemble.dependsOn shadowJar
 artifacts {
     archives shadowJar
 }
+
+/* Remove the "library" jar from the archives configuration so it's not
+ * published
+ */
+configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 
 
 bintray {
