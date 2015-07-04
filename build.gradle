@@ -7,11 +7,19 @@ apply plugin: 'application'
 
 group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.2.0'
+version = '0.2'
 mainClassName = 'com.github.lookout.verspaetung.Main'
 defaultTasks 'clean', 'check'
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+
+
+/* Little bit of version shenanigans to get a MINOR number supplied by Travis */
+
+if (System.env.TRAVIS_BUILD_NUMBER) {
+    version = "${version}.${System.env.TRAVIS_BUILD_NUMBER}"
+}
+else {
+    version = "${version}.0-SNAPSHOT"
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +47,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.0+'
+    compile 'org.codehaus.groovy:groovy-all:2.4.3+'
 
     [
      'curator-framework',

@@ -2,3 +2,9 @@ language: java
 jdk:
 - oraclejdk7
 - oraclejdk8
+env:
+  global:
+    secure: MzcJafov6+fztyym0hZFTxjirTAgVFqFRO4pSSoDUZV71jHBYRKLmQxiaYpqdl9d7Q7Jz7UfNZRSisNwZQdeZjs0B9yJwy9m1mDlJaUXIWN/xzW04qPnZ5zxh1yJHK+UHIw5G2qRZSE42m9G3TSRBlUz6OMk+tr2UYErfnKzcsc=
+
+after_success:
+    "./gradlew bintrayUpload -PbintrayUser=lookouteng -PbintrayKey=${BINTRAY_KEY}"
