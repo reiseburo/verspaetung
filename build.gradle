@@ -102,7 +102,7 @@ bintray {
     user = project.bintrayUser
     key = project.bintrayKey
     publish = true
-    dryRun = false
+    dryRun = true
     configurations = ['archives']
 
     pkg {
