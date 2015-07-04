@@ -4,8 +4,14 @@ jdk:
 - oraclejdk7
 - oraclejdk8
 
-script:
+# Using 'install' to run the clean to avoid Travis automatically calling
+# `./gradlew assemble and duplicating my work
+install:
     - ./gradlew clean
+
+# Invoke our default tasks, whatever is defined as important in the
+# build.gradle file
+script:
     - ./gradlew
 
 env:
