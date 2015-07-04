@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.0">
-<title>Untitled</title>
+<title>Verspätung</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Droid+Sans+Mono:400">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -409,17 +409,139 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .show-for-print{display:inherit!important}}
 </style>
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
+<h1>Verspätung</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_overview_readme">Overview/Readme</a>
+<ul class="sectlevel2">
+<li><a href="#_using">Using</a></li>
+</ul>
+</li>
+<li><a href="#_developing">Developing</a>
+<ul class="sectlevel2">
+<li><a href="#_useful_links">Useful links</a></li>
+<li><a href="#_hacking_verspätung">Hacking Verspätung</a></li>
+<li><a href="#_releasing_verspätung">Releasing Verspätung</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div class="sect1">
+<h2 id="_overview_readme">Overview/Readme</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Hello world!</p>
+<p><span class="image"><a class="image" href="https://travis-ci.org/lookout/verspaetung"><img src="https://travis-ci.org/lookout/verspaetung.svg?branch=master" alt="Build Status"></a></span></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="https://bintray.com/lookout/systems/verspaetung/_latestVersion"><img src="https://api.bintray.com/packages/lookout/systems/verspaetung/images/download.svg" alt="download"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>Verspätung is a small utility which aims to help identify delay of <a href="http://kafka.apache.org">Kafka</a> consumers.</p>
+</div>
+<div class="paragraph">
+<p>Verspätung monitors the topics and their latest offsets by talking to Kafka, it
+will also keep track of how far along consumers are by monitoring the offsets
+that they have committed to Zookeeper. Using both of these pieces of
+information, Verspätung computs the delta for each of the consumer groups and
+reports it to statsd.</p>
+</div>
+<div class="sect2">
+<h3 id="_using">Using</h3>
+<div class="literalblock">
+<div class="content">
+<pre>% java -jar verspaetung-*-all.jar --help
+usage: verspaetung
+ -H,--statsd-host &lt;STATSD&gt;   Hostname for a statsd instance (defaults to
+                             localhost)
+ -n,--dry-run                Disable reporting to a statsd host
+ -p,--statsd-port &lt;PORT&gt;     Port for the statsd instance (defaults to
+                             8125)
+ -s,--storm                  Watch Storm KafkaSpout offsets (under
+                             /kafka_spout)
+ -z,--zookeeper &lt;HOSTS&gt;      Comma separated list of Zookeeper hosts (e.g.
+                             localhost:2181)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Running Verspätung is rather easy, by default the daemon will monitor the
+standard Kafka high-level consumer offset path of <code>/consumers</code> and start
+reporting deltas automatically.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_developing">Developing</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_useful_links">Useful links</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="groovydoc/">Internal API docs</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_hacking_verspätung">Hacking Verspätung</h3>
+<div class="paragraph">
+<p>Verspätung is a <a href="http://groovy-lang.org">Groovy</a>-based application which is
+built with <a href="http://gradle.org">Gradle</a>. As such, if you are already familiar
+with these tools you should be able to find your way around the project with
+relative ease.</p>
+</div>
+<div class="paragraph">
+<p>A quick primer on what tasks are available:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Running tests: <code>./gradlew check</code></p>
+</li>
+<li>
+<p>Running the app locally: <code>./gradlew run -PzookeeperHosts=localhost:2181</code></p>
+</li>
+<li>
+<p>Building the app for distribution: <code>./gradlew assemble</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_releasing_verspätung">Releasing Verspätung</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This is mostly meant for the developer team.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Currently releases can be produced by simply pushing a Git tag to this GitHub
+repository. This will cause Travis CI to build and test the tag, which if it is
+successful, will automatically publish to
+<a href="https://bintray.com/lookout/systems/verspaetung">Bintray</a>.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-07-04 14:47:48 PDT
+Last updated 2015-07-04 15:08:06 PDT
 </div>
 </div>
 </body>
