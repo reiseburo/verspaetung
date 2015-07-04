@@ -29,16 +29,3 @@ Running Verspätung is rather easy, by default the daemon will monitor the
 standard Kafka high-level consumer offset path of `/consumers` and start
 reporting deltas automatically.
 
-=== Hacking
-
-* Running tests: `./gradlew check`
-* Running the app locally: `./gradlew run -PzookeeperHosts=localhost:2181`
-* Building the app for distribution: `./gradlew assemble`
-
-
-=== Releasing
-
-This is mostly meant for the developer team, but currently releases can be
-produced by simply pushing a Git tag to this GitHub repository. This will cause
-Travis CI to build and test the tag, which if it is successful, will
-automatically publish to link:https://bintray.com/lookout/systems/verspaetung[Bintray].

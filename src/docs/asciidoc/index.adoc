@@ -1,6 +1,15 @@
 = Verspätung
 :toc: right
 
-== README
+
+== Overview/Readme
 
 include::../../../README.adoc[]
+
+== Developing
+
+=== Useful links
+
+* link:groovydoc/[Internal API docs]
+
+include::../../../HACKING.adoc[]

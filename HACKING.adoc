@@ -1,0 +1,23 @@
+=== Hacking Verspätung
+
+Verspätung is a link:http://groovy-lang.org[Groovy]-based application which is
+built with link:http://gradle.org[Gradle]. As such, if you are already familiar
+with these tools you should be able to find your way around the project with
+relative ease.
+
+
+A quick primer on what tasks are available:
+
+* Running tests: `./gradlew check`
+* Running the app locally: `./gradlew run -PzookeeperHosts=localhost:2181`
+* Building the app for distribution: `./gradlew assemble`
+
+
+=== Releasing Verspätung
+
+NOTE: This is mostly meant for the developer team.
+
+Currently releases can be produced by simply pushing a Git tag to this GitHub
+repository. This will cause Travis CI to build and test the tag, which if it is
+successful, will automatically publish to
+link:https://bintray.com/lookout/systems/verspaetung[Bintray].
