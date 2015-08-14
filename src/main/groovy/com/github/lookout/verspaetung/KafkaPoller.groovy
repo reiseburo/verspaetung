@@ -117,10 +117,10 @@ class KafkaPoller extends Thread {
         SimpleConsumer consumer = this.brokerConsumerMap[leaderId]
 
         /* If we don't have a proper SimpleConsumer instance (e.g. null) then
-         * we should reconnect on our next time around
+         * we might not have gotten valid data back from Zookeeper
          */
         if (!(consumer instanceof SimpleConsumer)) {
-            this.shouldReconnect = true
+            logger.warn("Attempted to the leaderId: ${leaderId} (${topic}/${partition}")
             return 0
         }
         TopicAndPartition topicAndPart = new TopicAndPartition(topic, partition)
