@@ -31,10 +31,8 @@ test {
 ////////////////////////////////////////////////////////////////////////////////
 //  DEPENDENCY MANAGEMENT
 repositories {
-    mavenCentral()
     jcenter()
-
-    maven { url 'https://dl.bintray.com/rtyler/maven' }
+    /* needed for forked metrics library */
     maven { url 'https://dl.bintray.com/lookout/systems' }
 }
 
