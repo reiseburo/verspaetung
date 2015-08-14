@@ -10,14 +10,11 @@ import kafka.cluster.Broker
 import kafka.client.ClientUtils
 import kafka.consumer.SimpleConsumer
 import kafka.common.TopicAndPartition
+import kafka.common.KafkaException
 import kafka.javaapi.*
 /* UGH */
 import scala.collection.JavaConversions
 
-/* Can't type check this because it makes the calls in and out of Scala an
- * atrocious pain in the ass
- */
-//@TypeChecked
 class KafkaPoller extends Thread {
     private final Integer POLLER_DELAY = (1 * 1000)
     private final String KAFKA_CLIENT_ID = 'VerspaetungClient'
@@ -57,6 +54,9 @@ class KafkaPoller extends Thread {
             if (this.currentTopics.size() > 0) {
                 try {
                     dumpMetadata()
+                }
+                catch (KafkaException kex) {
+                    logger.error("Failed to interact with Kafka: ${kex.message}")
                 }
                 catch (Exception ex) {
                     logger.error("Failed to fetch and dump Kafka metadata", ex)
