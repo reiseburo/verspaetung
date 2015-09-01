@@ -9,7 +9,7 @@ plugins {
 
 group = "com.github.lookout"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.3.0'
+version = '0.4.0'
 mainClassName = 'com.github.lookout.verspaetung.Main'
 defaultTasks 'check', 'assemble'
 
@@ -105,6 +105,14 @@ assemble.dependsOn shadowJar
 artifacts {
     archives shadowJar
 }
+
+/*
+ * https://github.com/lookout/verspaetung/issues/28
+ *
+ * disable the distZip and distTar tasks since we only need the shadow jar
+ */
+distZip.enabled = false
+distTar.enabled = false
 
 /* We're not building a library jar so we'll disable this default jar task  */
 jar.enabled = false
