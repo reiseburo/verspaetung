@@ -1,7 +1,5 @@
 language: java
-# Only the oraclejdk7 build on a tag will actually release
 jdk:
-- oraclejdk7
 - oraclejdk8
 
 # Using 'install' to run the clean to avoid Travis automatically calling
