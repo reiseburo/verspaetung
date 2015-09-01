@@ -58,8 +58,8 @@ class Main {
         }
 
         logger.info("Running with: ${args}")
-        logger.warn("Using: zookeepers={} statsd={}:{}", zookeeperHosts, statsdHost, statsdPort)
-        logger.info("Reporting every {} seconds", delayInSeconds)
+        logger.warn('Using: zookeepers={} statsd={}:{}', zookeeperHosts, statsdHost, statsdPort)
+        logger.info('Reporting every {} seconds', delayInSeconds)
 
         if (cli.hasOption('prefix')) {
             statsdPrefix = "${cli.getOptionValue('prefix')}.${METRICS_PREFIX}"
@@ -148,7 +148,7 @@ class Main {
         /* Start the reporter if we've got it */
         reporter?.start(delayInSeconds, TimeUnit.SECONDS)
 
-        logger.info("Starting wait loop...")
+        logger.info('Starting wait loop...')
         synchronized(this) {
             wait()
         }
