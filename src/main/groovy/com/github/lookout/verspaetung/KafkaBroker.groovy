@@ -4,9 +4,9 @@ package com.github.lookout.verspaetung
  * POJO containing the necessary information to model a Kafka broker
  */
 class KafkaBroker {
-    private String host
-    private Integer port
-    private Integer brokerId
+    final private String host
+    final private Integer port
+    final private Integer brokerId
 
     KafkaBroker(Object jsonObject, Integer brokerId) {
         this.host = jsonObject.host

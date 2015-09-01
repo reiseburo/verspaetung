@@ -4,18 +4,16 @@ import com.github.lookout.verspaetung.zk.BrokerTreeWatcher
 import com.github.lookout.verspaetung.zk.KafkaSpoutTreeWatcher
 import com.github.lookout.verspaetung.zk.StandardTreeWatcher
 import com.github.lookout.verspaetung.metrics.ConsumerGauge
+import com.github.lookout.verspaetung.metrics.HeartbeatGauge
 
-import java.util.AbstractMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.TimeUnit
-import groovy.transform.TypeChecked
 
 import org.apache.commons.cli.*
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.CuratorFramework
-import org.apache.curator.framework.recipes.cache.TreeCache
 import org.coursera.metrics.datadog.DatadogReporter
 import org.coursera.metrics.datadog.transport.UdpTransport
 import org.slf4j.Logger
@@ -23,13 +21,16 @@ import org.slf4j.LoggerFactory
 
 import com.codahale.metrics.*
 
-
+/**
+ * Main entry point for running the verspaetung application
+ */
+@SuppressWarnings
 class Main {
     private static final String METRICS_PREFIX = 'verspaetung'
 
-    private static Logger logger
-    private static ScheduledReporter reporter
+    private static final Logger logger = LoggerFactory.getLogger(Main)
     private static final MetricRegistry registry = new MetricRegistry()
+    private static ScheduledReporter reporter
 
     static void main(String[] args) {
         String statsdPrefix = METRICS_PREFIX
@@ -56,7 +57,6 @@ class Main {
             delayInSeconds = cli.getOptionValue('d').toInteger()
         }
 
-        logger = LoggerFactory.getLogger(Main.class)
         logger.info("Running with: ${args}")
         logger.warn("Using: zookeepers={} statsd={}:{}", zookeeperHosts, statsdHost, statsdPort)
         logger.info("Reporting every {} seconds", delayInSeconds)
@@ -65,9 +65,8 @@ class Main {
             statsdPrefix = "${cli.getOptionValue('prefix')}.${METRICS_PREFIX}"
         }
 
-
         registry.register(MetricRegistry.name(Main.class, 'heartbeat'),
-                            new metrics.HeartbeatGauge())
+                            new HeartbeatGauge())
 
         ExponentialBackoffRetry retry = new ExponentialBackoffRetry(1000, 3)
         CuratorFramework client = CuratorFrameworkFactory.newClient(zookeeperHosts, retry)

@@ -4,8 +4,8 @@ package com.github.lookout.verspaetung
  * Simple container for Kafka topic names and partition IDs
  */
 class TopicPartition {
-    private String topic
-    private Integer partition
+    private final String topic
+    private final Integer partition
 
     TopicPartition(String topic, Integer partition) {
         this.topic = topic
@@ -27,12 +27,8 @@ class TopicPartition {
             return false
         }
 
-        if ((this.topic == compared.topic) &&
-            (this.partition == compared.partition)) {
-            return true
-        }
-
-        return false
+        return (this.topic == compared.topic) &&
+            (this.partition == compared.partition)
     }
 
     @Override

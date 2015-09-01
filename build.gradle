@@ -3,6 +3,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '1.2.0'
     id "org.ajoberstar.github-pages" version "1.2.0"
     id "org.asciidoctor.gradle.asciidoctor" version "1.5.1"
+    id 'codenarc'
     id 'groovy'
     id 'application'
 }
@@ -63,6 +64,8 @@ dependencies {
     /* Logback is to be used for logging through the app */
     compile 'ch.qos.logback:logback-classic:1.1.2+'
 
+    codenarc "org.codenarc:CodeNarc:0.24"
+
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
     testCompile 'cglib:cglib-nodep:2.2.+'
 }
@@ -92,6 +95,14 @@ githubPages {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+codenarc {
+    configFile file("${projectDir}/gradle/codenarc.rules")
+    sourceSets = [sourceSets.main]
+}
+codenarcMain {
+    exclude '**/Main.groovy'
+}
+
 shadowJar {
     exclude 'META-INF/*.RSA', 'META-INF/*.DSA'
     manifest {

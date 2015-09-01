@@ -1,22 +1,22 @@
 package com.github.lookout.verspaetung.zk
 
 import com.github.lookout.verspaetung.KafkaConsumer
-import com.github.lookout.verspaetung.TopicPartition
 
-import java.util.concurrent.CopyOnWriteArrayList
 import groovy.transform.TypeChecked
 
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent
 
+/**
+ */
 @TypeChecked
 abstract class AbstractConsumerTreeWatcher extends AbstractTreeWatcher {
     protected AbstractMap<KafkaConsumer, Integer> consumerOffsets
     protected AbstractSet<String> watchedTopics
     protected List<Closure> onConsumerData = []
 
-    AbstractConsumerTreeWatcher(CuratorFramework client,
+    protected AbstractConsumerTreeWatcher(CuratorFramework client,
                                 AbstractSet topics,
                                 AbstractMap offsets) {
         super(client)
@@ -86,12 +86,8 @@ abstract class AbstractConsumerTreeWatcher extends AbstractTreeWatcher {
      * we're interested in
      */
     Boolean isNodeEvent(TreeCacheEvent event) {
-        if ((event?.type == TreeCacheEvent.Type.NODE_ADDED) ||
-            (event?.type == TreeCacheEvent.Type.NODE_UPDATED)) {
-            return true
-        }
-        return false
+        return (event?.type == TreeCacheEvent.Type.NODE_ADDED) ||
+            (event?.type == TreeCacheEvent.Type.NODE_UPDATED)
     }
 }
-
 

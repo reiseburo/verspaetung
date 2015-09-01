@@ -15,7 +15,7 @@ import org.apache.curator.framework.recipes.cache.ChildData
 @InheritConstructors
 class KafkaSpoutTreeWatcher extends AbstractConsumerTreeWatcher {
     private static final String ZK_PATH = '/kafka_spout'
-    private JsonSlurper json
+    private final JsonSlurper json
 
     KafkaSpoutTreeWatcher(CuratorFramework client,
                           AbstractSet topics,
@@ -25,12 +25,15 @@ class KafkaSpoutTreeWatcher extends AbstractConsumerTreeWatcher {
         this.json = new JsonSlurper()
     }
 
-    String zookeeperPath() { return ZK_PATH }
+    String zookeeperPath() {
+        return ZK_PATH
+    }
 
     /* skipping type checking since Groovy's JsonSlurper gives us a pretty
      * loose Object to deal with
      */
     @TypeChecked(TypeCheckingMode.SKIP)
+    @SuppressWarnings(['LineLength'])
     ConsumerOffset processChildData(ChildData nodeData) {
         Object offsetData = json.parseText(new String(nodeData.data, 'UTF-8'))
         /*

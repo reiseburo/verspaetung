@@ -4,15 +4,10 @@ import com.github.lookout.verspaetung.KafkaBroker
 
 import groovy.json.JsonSlurper
 import groovy.transform.TypeChecked
-import java.util.Collections
 
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.ChildData
-import org.apache.curator.framework.recipes.cache.TreeCache
-import org.apache.curator.framework.recipes.cache.TreeCacheListener
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * The BrokerTreeWatcher is a kind of watcher whose sole purpose is
@@ -24,11 +19,10 @@ class BrokerTreeWatcher extends AbstractTreeWatcher {
     static final Integer INVALID_BROKER_ID = -1
     private static final String BROKERS_PATH = '/brokers/ids'
 
-    private final Logger logger = LoggerFactory.getLogger(BrokerTreeWatcher.class)
-    private JsonSlurper json
-    private List<Closure> onBrokerUpdates
     private Boolean isTreeInitialized = false
-    private List<KafkaBroker> brokers
+    private final JsonSlurper json
+    private final List<Closure> onBrokerUpdates
+    private final List<KafkaBroker> brokers
 
     BrokerTreeWatcher(CuratorFramework client) {
         super(client)
@@ -37,7 +31,6 @@ class BrokerTreeWatcher extends AbstractTreeWatcher {
         this.brokers = []
         this.onBrokerUpdates = []
     }
-
 
     String zookeeperPath() {
         return BROKERS_PATH

@@ -1,6 +1,6 @@
 package com.github.lookout.verspaetung.metrics
 
-import com.codahale.metrics.*
+import com.codahale.metrics.Gauge
 
 /**
  * A simple gauge that will always just return 1 indicating that the process is

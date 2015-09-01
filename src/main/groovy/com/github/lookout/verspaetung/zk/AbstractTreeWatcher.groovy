@@ -16,19 +16,21 @@ import org.slf4j.LoggerFactory
  * further down the pipeline
  */
 @TypeChecked
+@SuppressWarnings(['ThisReferenceEscapesConstructor'])
 abstract class AbstractTreeWatcher implements TreeCacheListener {
     protected List<Closure> onInitComplete
     protected Logger logger
     protected CuratorFramework client
     protected TreeCache cache
 
-    AbstractTreeWatcher(CuratorFramework client) {
-        this.logger = LoggerFactory.getLogger(this.class)
-        this.client = client
-        this.onInitComplete = []
+    protected AbstractTreeWatcher(CuratorFramework curatorClient) {
+        logger = LoggerFactory.getLogger(this.class)
+        client = curatorClient
+        onInitComplete = []
 
-        this.cache = new TreeCache(client, zookeeperPath())
-        this.cache.listenable.addListener(this)
+        cache = new TreeCache(client, zookeeperPath())
+        /* this may introduce a race condition, need to figure out a better way to handle it */
+        cache.listenable.addListener(this)
     }
 
     /**

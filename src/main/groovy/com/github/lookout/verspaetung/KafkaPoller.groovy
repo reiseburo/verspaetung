@@ -1,8 +1,5 @@
 package com.github.lookout.verspaetung
 
-import groovy.transform.TypeChecked
-
-import java.util.concurrent.ConcurrentHashMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -11,24 +8,28 @@ import kafka.client.ClientUtils
 import kafka.consumer.SimpleConsumer
 import kafka.common.TopicAndPartition
 import kafka.common.KafkaException
-import kafka.javaapi.*
 /* UGH */
 import scala.collection.JavaConversions
 
+/**
+ * KafkaPoller is a relatively simple class which contains a runloop for periodically
+ * contacting the Kafka brokers defined in Zookeeper and fetching the latest topic
+ * meta-data for them
+ */
 class KafkaPoller extends Thread {
-    private final Integer POLLER_DELAY = (1 * 1000)
-    private final String KAFKA_CLIENT_ID = 'VerspaetungClient'
-    private final Integer KAFKA_TIMEOUT = (5 * 1000)
-    private final Integer KAFKA_BUFFER = (100 * 1024)
-    private final Logger logger = LoggerFactory.getLogger(KafkaPoller.class)
+    private static final Integer POLLER_DELAY = (1 * 1000)
+    private static final String KAFKA_CLIENT_ID = 'VerspaetungClient'
+    private static final Integer KAFKA_TIMEOUT = (5 * 1000)
+    private static final Integer KAFKA_BUFFER = (100 * 1024)
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaPoller)
 
     private Boolean keepRunning = true
     private Boolean shouldReconnect = false
-    private ConcurrentHashMap<Integer, SimpleConsumer> brokerConsumerMap
-    private AbstractMap<TopicPartition, Long> topicOffsetMap
+    private final AbstractMap<Integer, SimpleConsumer> brokerConsumerMap
+    private final AbstractMap<TopicPartition, Long> topicOffsetMap
+    private final List<Closure> onDelta
+    private final AbstractSet<String> currentTopics
     private List<Broker> brokers
-    private List<Closure> onDelta
-    private AbstractSet<String> currentTopics
 
     KafkaPoller(AbstractMap map, AbstractSet topicSet) {
         this.topicOffsetMap = map
@@ -38,11 +39,18 @@ class KafkaPoller extends Thread {
         this.onDelta = []
     }
 
+    /* There are a number of cases where we intentionally swallow stacktraces
+     * to ensure that we're not unnecessarily spamming logs with useless stacktraces
+     *
+     * For CatchException, we're explicitly gobbling up all potentially crashing exceptions
+     * here
+     */
+    @SuppressWarnings(['LoggingSwallowsStacktrace', 'CatchException'])
     void run() {
-        logger.info("Starting wait loop")
+        LOGGER.info('Starting wait loop')
 
         while (keepRunning) {
-            logger.debug("poll loop")
+            LOGGER.debug('poll loop')
 
             if (shouldReconnect) {
                 reconnect()
@@ -56,10 +64,10 @@ class KafkaPoller extends Thread {
                     dumpMetadata()
                 }
                 catch (KafkaException kex) {
-                    logger.error("Failed to interact with Kafka: ${kex.message}")
+                    LOGGER.error('Failed to interact with Kafka: {}', kex.message)
                 }
                 catch (Exception ex) {
-                    logger.error("Failed to fetch and dump Kafka metadata", ex)
+                    LOGGER.error('Failed to fetch and dump Kafka metadata', ex)
                 }
             }
 
@@ -67,21 +75,23 @@ class KafkaPoller extends Thread {
         }
     }
 
+    @SuppressWarnings(['CatchException'])
     void dumpMetadata() {
-        logger.debug("dumping meta-data")
+        LOGGER.debug('dumping meta-data')
 
-        def metadata = fetchMetadataForCurrentTopics()
+        Object metadata = fetchMetadataForCurrentTopics()
 
         withTopicsAndPartitions(metadata) { tp, p ->
             try {
                 captureLatestOffsetFor(tp, p)
             }
             catch (Exception ex) {
-                logger.error("Failed to fetch latest for ${tp.topic}:${tp.partition}", ex)
+                LOGGER.error('Failed to fetch latest for {}:{}', tp.topic, tp.partition, ex)
+
             }
         }
 
-        logger.debug("finished dumping meta-data")
+        LOGGER.debug('finished dumping meta-data')
     }
 
     /**
@@ -99,7 +109,6 @@ class KafkaPoller extends Thread {
             }
         }
     }
-
 
     /**
      * Fetch the leader metadata and update our data structures
@@ -120,7 +129,7 @@ class KafkaPoller extends Thread {
          * we might not have gotten valid data back from Zookeeper
          */
         if (!(consumer instanceof SimpleConsumer)) {
-            logger.warn("Attempted to the leaderId: ${leaderId} (${topic}/${partition}")
+            LOGGER.warn('Attempted to the leaderId: {} ({}/{})', leaderId, topic, partition)
             return 0
         }
         TopicAndPartition topicAndPart = new TopicAndPartition(topic, partition)
@@ -137,7 +146,7 @@ class KafkaPoller extends Thread {
      */
     void reconnect() {
         disconnectConsumers()
-        logger.info("Creating SimpleConsumer connections for brokers")
+        LOGGER.info('Creating SimpleConsumer connections for brokers')
         this.brokers.each { Broker b ->
             SimpleConsumer consumer = new SimpleConsumer(b.host,
                                                          b.port,
@@ -160,7 +169,7 @@ class KafkaPoller extends Thread {
 
     private void disconnectConsumers() {
         this.brokerConsumerMap.each { Integer brokerId, SimpleConsumer client ->
-            logger.info("Disconnecting ${client}")
+            LOGGER.info('Disconnecting {}', client)
             client?.disconnect()
         }
     }
@@ -190,7 +199,6 @@ class KafkaPoller extends Thread {
         return JavaConversions.asScalaSet(set)
     }
 
-
     private Object fetchMetadataForCurrentTopics() {
         return ClientUtils.fetchTopicMetadata(
                             toScalaSet(currentTopics),
@@ -199,6 +207,4 @@ class KafkaPoller extends Thread {
                             KAFKA_TIMEOUT,
                             0)
     }
-
-
 }

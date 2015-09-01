@@ -39,13 +39,9 @@ class KafkaConsumer {
             return false
         }
 
-        if ((this.topic == compared.topic) &&
+        return (this.topic == compared.topic) &&
             (this.partition == compared.partition) &&
-            (this.name == compared.name)) {
-            return true
-        }
-
-        return false
+            (this.name == compared.name)
     }
 
 }

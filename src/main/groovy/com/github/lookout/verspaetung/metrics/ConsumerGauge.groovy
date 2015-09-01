@@ -1,15 +1,11 @@
 package com.github.lookout.verspaetung.metrics
 
-import java.util.AbstractMap
 import com.codahale.metrics.Gauge
 import groovy.transform.TypeChecked
 import org.coursera.metrics.datadog.Tagged
 
 import com.github.lookout.verspaetung.KafkaConsumer
 import com.github.lookout.verspaetung.TopicPartition
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Dropwizard Metrics Gauge for reporting the value of a given KafkaConsumer
@@ -19,9 +15,7 @@ class ConsumerGauge implements Gauge<Integer>, Tagged {
     protected KafkaConsumer consumer
     protected AbstractMap<KafkaConsumer, Integer> consumers
     protected AbstractMap<TopicPartition, Long> topics
-    private TopicPartition topicPartition
-
-    private Logger logger = LoggerFactory.getLogger(ConsumerGauge.class)
+    private final TopicPartition topicPartition
 
     ConsumerGauge(KafkaConsumer consumer,
                   AbstractMap<KafkaConsumer, Integer> consumers,
@@ -55,7 +49,7 @@ class ConsumerGauge implements Gauge<Integer>, Tagged {
         return ["partition:${this.consumer.partition}",
                 "topic:${this.consumer.topic}",
                 "consumer-group:${this.consumer.name}"
-                ].collect { s -> s.toString() }
+                ]*.toString()
     }
 
     /**
