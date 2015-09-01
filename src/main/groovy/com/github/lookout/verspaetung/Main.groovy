@@ -36,6 +36,7 @@ class Main {
         String zookeeperHosts = 'localhost:2181'
         String statsdHost = 'localhost'
         Integer statsdPort = 8125
+        Integer delayInSeconds = 5
 
         CommandLine cli = parseCommandLine(args)
 
@@ -51,9 +52,14 @@ class Main {
             statsdPort = cli.getOptionValue('p')
         }
 
+        if (cli.hasOption('d')) {
+            delayInSeconds = cli.getOptionValue('d').toInteger()
+        }
+
         logger = LoggerFactory.getLogger(Main.class)
         logger.info("Running with: ${args}")
-        logger.warn("Using: zookeepers=${zookeeperHosts} statsd=${statsdHost}:${statsdPort}")
+        logger.warn("Using: zookeepers={} statsd={}:{}", zookeeperHosts, statsdHost, statsdPort)
+        logger.info("Reporting every {} seconds", delayInSeconds)
 
         if (cli.hasOption('prefix')) {
             statsdPrefix = "${cli.getOptionValue('prefix')}.${METRICS_PREFIX}"
@@ -141,7 +147,7 @@ class Main {
         }
 
         /* Start the reporter if we've got it */
-        reporter?.start(1, TimeUnit.SECONDS)
+        reporter?.start(delayInSeconds, TimeUnit.SECONDS)
 
         logger.info("Starting wait loop...")
         synchronized(this) {
@@ -207,12 +213,20 @@ class Main {
                                            .withLongOpt('prefix')
                                            .create()
 
+        Option delaySeconds = OptionBuilder.withArgName('DELAY')
+                                           .hasArg()
+                                           .withType(Integer)
+                                           .withDescription("Seconds to delay between reporting metrics to the metrics receiver (defaults: 5s)")
+                                           .withLongOpt('delay')
+                                           .create('d')
+
         options.addOption(zookeeper)
         options.addOption(statsdHost)
         options.addOption(statsdPort)
         options.addOption(statsdPrefix)
         options.addOption(dryRun)
         options.addOption(stormSpouts)
+        options.addOption(delaySeconds)
 
         return options
     }
