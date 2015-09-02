@@ -38,6 +38,7 @@ class Main {
         String statsdHost = 'localhost'
         Integer statsdPort = 8125
         Integer delayInSeconds = 5
+        String[] excludeGroups = []
 
         CommandLine cli = parseCommandLine(args)
 
@@ -55,6 +56,10 @@ class Main {
 
         if (cli.hasOption('d')) {
             delayInSeconds = cli.getOptionValue('d').toInteger()
+        }
+
+        if (cli.hasOption('x')) {
+            excludeGroups = cli.getOptionValues('x')
         }
 
         logger.info("Running with: ${args}")
@@ -106,7 +111,9 @@ class Main {
          * one
          */
         Closure gaugeRegistrar = { KafkaConsumer consumer ->
-            registerMetricFor(consumer, consumerGauges, consumerOffsets, topicOffsets)
+            if (!shouldExcludeConsumer(excludeGroups, consumer)) {
+                registerMetricFor(consumer, consumerGauges, consumerOffsets, topicOffsets)
+            }
         }
 
         StandardTreeWatcher consumerWatcher = new StandardTreeWatcher(client,
@@ -158,6 +165,9 @@ class Main {
                                   ConcurrentHashMap<KafkaConsumer, ConsumerGauge> consumerGauges,
                                   ConcurrentHashMap<KafkaConsumer, Integer> consumerOffsets,
                                   ConcurrentHashMap<TopicPartition, Long> topicOffsets) {
+        /*
+         * Bail early if we already ahve our Consumer registered
+         */
         if (consumerGauges.containsKey(consumer)) {
             return
         }
@@ -182,6 +192,12 @@ class Main {
                                         .withLongOpt('zookeeper')
                                         .withValueSeparator(',' as char)
                                         .create('z')
+
+        Option excludeGroups = OptionBuilder.withArgName('EXCLUDES')
+                                            .hasArgs()
+                                            .withDescription('Regular expression for consumer groups to exclude from reporting (can be declared multiple times)')
+                                            .withLongOpt('exclude')
+                                            .create('x')
 
         Option statsdHost = OptionBuilder.withArgName('STATSD')
                                          .hasArg()
@@ -226,6 +242,7 @@ class Main {
         options.addOption(dryRun)
         options.addOption(stormSpouts)
         options.addOption(delaySeconds)
+        options.addOption(excludeGroups)
 
         return options
     }
@@ -248,5 +265,13 @@ class Main {
             formatter.printHelp('verspaetung', options)
             System.exit(1)
         }
+    }
+
+    /**
+     * Return true if we should exclude the given KafkaConsumer from reporting
+     */
+
+    static boolean shouldExcludeConsumer(String[] excludeGroups, KafkaConsumer consumer) {
+        return null != excludeGroups?.find { String excludeRule -> consumer?.name.matches(excludeRule) }
     }
 }
