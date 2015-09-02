@@ -15,13 +15,20 @@ reports it to statsd.
 
     % java -jar verspaetung-*-all.jar --help
     usage: verspaetung
+     -d,--delay <DELAY>          Seconds to delay between reporting metrics to
+                                 the metrics receiver (defaults: 5s)
      -H,--statsd-host <STATSD>   Hostname for a statsd instance (defaults to
                                  localhost)
      -n,--dry-run                Disable reporting to a statsd host
      -p,--statsd-port <PORT>     Port for the statsd instance (defaults to
                                  8125)
+        --prefix <PREFIX>        Prefix all metrics with PREFIX before they're
+                                 reported (e.g. PREFIX.verspaetung.mytopic)
      -s,--storm                  Watch Storm KafkaSpout offsets (under
                                  /kafka_spout)
+     -x,--exclude <EXCLUDES>     Regular expression for consumer groups to
+                                 exclude from reporting (can be declared
+                                 multiple times)
      -z,--zookeeper <HOSTS>      Comma separated list of Zookeeper hosts (e.g.
                                  localhost:2181)
 
