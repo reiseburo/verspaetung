@@ -79,6 +79,7 @@ class KafkaPoller extends Thread {
 
             Thread.sleep(delay.value())
         }
+        disconnectConsumers()
     }
 
     private void slower(Delay delay) {
@@ -178,7 +179,6 @@ class KafkaPoller extends Thread {
      */
     void die() {
         this.keepRunning = false
-        disconnectConsumers()
     }
 
     private void disconnectConsumers() {

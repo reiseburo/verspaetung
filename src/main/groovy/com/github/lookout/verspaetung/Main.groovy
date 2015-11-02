@@ -126,8 +126,9 @@ class Main {
         /* Assuming that most people aren't needing to run Storm-based watchers
          * as well
          */
+        KafkaSpoutTreeWatcher stormWatcher = null
         if (cli.hasOption('s')) {
-            KafkaSpoutTreeWatcher stormWatcher = new KafkaSpoutTreeWatcher(client,
+            stormWatcher = new KafkaSpoutTreeWatcher(client,
                                                                            watchedTopics,
                                                                            consumerOffsets)
             stormWatcher.onConsumerData << gaugeRegistrar
@@ -155,6 +156,18 @@ class Main {
         /* Start the reporter if we've got it */
         reporter?.start(delayInSeconds, TimeUnit.SECONDS)
 
+        // shutdown threads
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+                                                 public void run() {
+                                                     Main.logger.info("showdown threads")
+                                                     poller.die()
+                                                     consumerWatcher.close()
+                                                     if (stormWatcher != null) {
+                                                         stormWatcher.close()
+                                                     }
+                                                     poller.join()
+                                                 }
+                                             });
         logger.info('Starting wait loop...')
         synchronized(this) {
             wait()
