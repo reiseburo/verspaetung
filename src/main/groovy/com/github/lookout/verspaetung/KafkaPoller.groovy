@@ -17,7 +17,7 @@ import scala.collection.JavaConversions
  * meta-data for them
  */
 class KafkaPoller extends Thread {
-    private static final Integer POLLER_DELAY = (1 * 1000)
+
     private static final String KAFKA_CLIENT_ID = 'VerspaetungClient'
     private static final Integer KAFKA_TIMEOUT = (5 * 1000)
     private static final Integer KAFKA_BUFFER = (100 * 1024)
@@ -48,7 +48,8 @@ class KafkaPoller extends Thread {
     @SuppressWarnings(['LoggingSwallowsStacktrace', 'CatchException'])
     void run() {
         LOGGER.info('Starting wait loop')
-
+        Delay delay = new Delay()
+        LOGGER.error('polling ' + delay)
         while (keepRunning) {
             LOGGER.debug('poll loop')
 
@@ -62,16 +63,27 @@ class KafkaPoller extends Thread {
             if (this.currentTopics.size() > 0) {
                 try {
                     dumpMetadata()
+                    if (delay.reset()) {
+                        LOGGER.error('back to normal ' + delay)
+                    }
                 }
                 catch (KafkaException kex) {
                     LOGGER.error('Failed to interact with Kafka: {}', kex.message)
+                    slower(delay)
                 }
                 catch (Exception ex) {
                     LOGGER.error('Failed to fetch and dump Kafka metadata', ex)
+                    slower(delay)
                 }
             }
 
-            Thread.sleep(POLLER_DELAY)
+            Thread.sleep(delay.value())
+        }
+    }
+
+    void slower(Delay delay) {
+        if (delay.slower()) {
+            LOGGER.error('using ' + delay)
         }
     }
 
