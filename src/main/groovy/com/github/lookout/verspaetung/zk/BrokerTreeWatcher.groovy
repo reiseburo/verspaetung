@@ -28,7 +28,7 @@ class BrokerTreeWatcher extends AbstractTreeWatcher {
         super(client)
 
         this.json = new JsonSlurper()
-        this.brokers = []
+        this.brokers = Collections.synchronizedList([])
         this.onBrokerUpdates = []
     }
 
@@ -47,9 +47,8 @@ class BrokerTreeWatcher extends AbstractTreeWatcher {
          */
         if (event.type == TreeCacheEvent.Type.INITIALIZED) {
             this.isTreeInitialized = true
-            List threadsafeBrokers = Collections.synchronizedList(this.brokers)
             this.onBrokerUpdates.each { Closure c ->
-                c?.call(threadsafeBrokers)
+                c?.call(this.brokers)
             }
             return
         }
@@ -68,6 +67,12 @@ class BrokerTreeWatcher extends AbstractTreeWatcher {
         Object brokerData = json.parseText(new String(nodeData.data, 'UTF-8'))
 
         this.brokers << new KafkaBroker(brokerData, brokerId)
+
+        if (this.isTreeInitialized) {
+            this.onBrokerUpdates.each { Closure c ->
+                c?.call(this.brokers)
+            }
+        }
     }
 
     /**

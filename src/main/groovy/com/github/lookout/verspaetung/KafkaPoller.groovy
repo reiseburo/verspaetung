@@ -29,7 +29,7 @@ class KafkaPoller extends Thread {
     private final AbstractMap<TopicPartition, Long> topicOffsetMap
     private final List<Closure> onDelta
     private final AbstractSet<String> currentTopics
-    private List<Broker> brokers
+    private final List<Broker> brokers
 
     KafkaPoller(AbstractMap map, AbstractSet topicSet) {
         this.topicOffsetMap = map
@@ -159,14 +159,16 @@ class KafkaPoller extends Thread {
     void reconnect() {
         disconnectConsumers()
         LOGGER.info('Creating SimpleConsumer connections for brokers')
-        this.brokers.each { Broker b ->
-            SimpleConsumer consumer = new SimpleConsumer(b.host,
-                                                         b.port,
-                                                         KAFKA_TIMEOUT,
-                                                         KAFKA_BUFFER,
-                                                         KAFKA_CLIENT_ID)
-            consumer.connect()
-            this.brokerConsumerMap[b.id] = consumer
+        synchronized(this.brokers) {
+            this.brokers.each { Broker b ->
+                SimpleConsumer consumer = new SimpleConsumer(b.host,
+                                                             b.port,
+                                                             KAFKA_TIMEOUT,
+                                                             KAFKA_BUFFER,
+                                                             KAFKA_CLIENT_ID)
+                consumer.connect()
+                this.brokerConsumerMap[b.id] = consumer
+            }
         }
         this.shouldReconnect = false
     }
@@ -190,8 +192,11 @@ class KafkaPoller extends Thread {
      * Store a new list of KafkaBroker objects and signal a reconnection
      */
     void refresh(List<KafkaBroker> brokers) {
-        this.brokers = brokers.collect { KafkaBroker b ->
-            new Broker(b.brokerId, b.host, b.port)
+        synchronized(this.brokers) {
+            this.brokers.clear()
+            this.brokers.addAll(brokers.collect { KafkaBroker b ->
+                new Broker(b.brokerId, b.host, b.port)
+            })
         }
         this.shouldReconnect = true
     }
@@ -201,7 +206,9 @@ class KafkaPoller extends Thread {
      * scala underpinnings
      */
     private scala.collection.immutable.Seq getBrokersSeq() {
-        return JavaConversions.asScalaBuffer(this.brokers).toList()
+        synchronized(this.brokers) {
+            return JavaConversions.asScalaBuffer(this.brokers).toList()
+        }
     }
 
     /**
