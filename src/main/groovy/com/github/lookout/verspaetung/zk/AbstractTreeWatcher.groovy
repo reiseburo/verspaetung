@@ -47,5 +47,13 @@ abstract class AbstractTreeWatcher implements TreeCacheListener {
         return this
     }
 
+    /**
+     * Close our internal cache and return ourselves for API cleanliness
+     */
+    AbstractTreeWatcher close() {
+        this.cache?.close()
+        return this
+    }
+
     abstract void childEvent(CuratorFramework client, TreeCacheEvent event)
 }
