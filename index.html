@@ -435,11 +435,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_overview_readme">Overview/Readme</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><span class="image"><a class="image" href="https://travis-ci.org/lookout/verspaetung"><img src="https://travis-ci.org/lookout/verspaetung.svg?branch=master" alt="Build Status"></a></span></p>
+<p><span class="image"><a class="image" href="https://travis-ci.org/reiseburo/verspaetung"><img src="https://travis-ci.org/reiseburo/verspaetung.svg?branch=master" alt="Build Status"></a></span></p>
 </div>
 <div class="imageblock">
 <div class="content">
-<a class="image" href="https://bintray.com/lookout/systems/verspaetung/_latestVersion"><img src="https://api.bintray.com/packages/lookout/systems/verspaetung/images/download.svg" alt="download"></a>
+<a class="image" href="https://bintray.com/reiseburo/systems/verspaetung/_latestVersion"><img src="https://api.bintray.com/packages/reiseburo/systems/verspaetung/images/download.svg" alt="download"></a>
 </div>
 </div>
 <div class="paragraph">
@@ -458,13 +458,20 @@ reports it to statsd.</p>
 <div class="content">
 <pre>% java -jar verspaetung-*-all.jar --help
 usage: verspaetung
+ -d,--delay &lt;DELAY&gt;          Seconds to delay between reporting metrics to
+                             the metrics receiver (defaults: 5s)
  -H,--statsd-host &lt;STATSD&gt;   Hostname for a statsd instance (defaults to
                              localhost)
  -n,--dry-run                Disable reporting to a statsd host
  -p,--statsd-port &lt;PORT&gt;     Port for the statsd instance (defaults to
                              8125)
+    --prefix &lt;PREFIX&gt;        Prefix all metrics with PREFIX before they're
+                             reported (e.g. PREFIX.verspaetung.mytopic)
  -s,--storm                  Watch Storm KafkaSpout offsets (under
                              /kafka_spout)
+ -x,--exclude &lt;EXCLUDES&gt;     Regular expression for consumer groups to
+                             exclude from reporting (can be declared
+                             multiple times)
  -z,--zookeeper &lt;HOSTS&gt;      Comma separated list of Zookeeper hosts (e.g.
                              localhost:2181)</pre>
 </div>
@@ -533,7 +540,7 @@ This is mostly meant for the developer team.
 <p>Currently releases can be produced by simply pushing a Git tag to this GitHub
 repository. This will cause Travis CI to build and test the tag, which if it is
 successful, will automatically publish to
-<a href="https://bintray.com/lookout/systems/verspaetung">Bintray</a>.</p>
+<a href="https://bintray.com/reiseburo/apps/verspaetung">Bintray</a>.</p>
 </div>
 </div>
 </div>
@@ -541,7 +548,7 @@ successful, will automatically publish to
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-07-04 15:08:06 PDT
+Last updated 2015-07-04 15:08:06 -07:00
 </div>
 </div>
 </body>

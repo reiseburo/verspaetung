@@ -19,8 +19,8 @@
 <html>
 <head>
 
-<title>com.github.lookout.verspaetung (verspaetung 0.3.0 API)</title>
-<meta name="keywords" content="com.github.lookout.verspaetung package">
+<title>com.github.reiseburo.verspaetung (verspaetung 0.5.0 API)</title>
+<meta name="keywords" content="com.github.reiseburo.verspaetung package">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel ="stylesheet" TYPE="text/css" HREF="../../../../stylesheet.css" title="Style">
 <link href="../../../../groovy.ico" type="image/x-icon" rel="shortcut icon">
@@ -28,7 +28,7 @@
 <script type="text/javascript">
 function windowTitle()
 {
-    parent.document.title="com.github.lookout.verspaetung (verspaetung 0.3.0 API)";
+    parent.document.title="com.github.reiseburo.verspaetung (verspaetung 0.5.0 API)";
 }
 </script>
 <noscript>
@@ -57,7 +57,7 @@ function windowTitle()
 
 <div class="subNav">
     <ul class="navList">
-        <li><a href="../../../../index.html?com/github/lookout/verspaetung/package-summary.html" target="_top">Frames</a></li>
+        <li><a href="../../../../index.html?com/github/reiseburo/verspaetung/package-summary.html" target="_top">Frames</a></li>
         <li><a href="package-summary.html" target="_top">No Frames</a></li>
     </ul>
 </div>
@@ -65,7 +65,7 @@ function windowTitle()
 <!-- ========= END OF TOP NAVBAR ========= -->
 
 <div class="header">
-    <h1 class="title">Package com.github.lookout.verspaetung</h1>
+    <h1 class="title">Package com.github.reiseburo.verspaetung</h1>
 </div>
 
 
@@ -87,7 +87,16 @@ function windowTitle()
                     </tr>
 <tr class="altColor">
                             <td class="colOne">
-                                <strong><a href="KafkaBroker.html" title="class in com/github/lookout/verspaetung">
+                                <strong><a href="Delay.html" title="class in com/github/reiseburo/verspaetung">
+                                    Delay
+                                </a></strong>
+                            </td>
+                            <td>abstract the logic on how to reduce the polling speed and get back to
+ to full speed.</td>
+                        </tr>
+<tr class="altColor">
+                            <td class="colOne">
+                                <strong><a href="KafkaBroker.html" title="class in com/github/reiseburo/verspaetung">
                                     KafkaBroker
                                 </a></strong>
                             </td>
@@ -95,7 +104,7 @@ function windowTitle()
                         </tr>
 <tr class="altColor">
                             <td class="colOne">
-                                <strong><a href="KafkaConsumer.html" title="class in com/github/lookout/verspaetung">
+                                <strong><a href="KafkaConsumer.html" title="class in com/github/reiseburo/verspaetung">
                                     KafkaConsumer
                                 </a></strong>
                             </td>
@@ -103,23 +112,25 @@ function windowTitle()
                         </tr>
 <tr class="altColor">
                             <td class="colOne">
-                                <strong><a href="KafkaPoller.html" title="class in com/github/lookout/verspaetung">
+                                <strong><a href="KafkaPoller.html" title="class in com/github/reiseburo/verspaetung">
                                     KafkaPoller
                                 </a></strong>
                             </td>
-                            <td></td>
+                            <td>KafkaPoller is a relatively simple class which contains a runloop for periodically
+ contacting the Kafka brokers defined in Zookeeper and fetching the latest topic
+ meta-data for them</td>
                         </tr>
 <tr class="altColor">
                             <td class="colOne">
-                                <strong><a href="Main.html" title="class in com/github/lookout/verspaetung">
+                                <strong><a href="Main.html" title="class in com/github/reiseburo/verspaetung">
                                     Main
                                 </a></strong>
                             </td>
-                            <td></td>
+                            <td>Main entry point for running the verspaetung application</td>
                         </tr>
 <tr class="altColor">
                             <td class="colOne">
-                                <strong><a href="TopicPartition.html" title="class in com/github/lookout/verspaetung">
+                                <strong><a href="TopicPartition.html" title="class in com/github/reiseburo/verspaetung">
                                     TopicPartition
                                 </a></strong>
                             </td>
