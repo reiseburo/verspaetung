@@ -9,10 +9,10 @@ plugins {
     id 'application'
 }
 
-group = "com.github.lookout"
+group = "com.github.reiseburo"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.4.0'
-mainClassName = 'com.github.lookout.verspaetung.Main'
+version = '0.5.0'
+mainClassName = 'com.github.reiseburo.verspaetung.Main'
 defaultTasks 'check', 'assemble'
 
 /* Ensure we properly build for JDK7 still */
@@ -142,8 +142,16 @@ artifacts {
     archives shadowJar
 }
 
+sourceSets {
+    main {
+        groovy {
+            exclude '**/*.sw*'
+        }
+    }
+}
+
 /*
- * https://github.com/lookout/verspaetung/issues/28
+ * https://github.com/reiseburo/verspaetung/issues/28
  *
  * disable the distZip and distTar tasks since we only need the shadow jar
  */
@@ -171,8 +179,8 @@ bintray {
     configurations = ['archives']
 
     pkg {
-        userOrg = 'lookout'
-        repo = 'systems'
+        userOrg = 'reiseburo'
+        repo = 'apps'
         name = 'verspaetung'
         labels = []
 

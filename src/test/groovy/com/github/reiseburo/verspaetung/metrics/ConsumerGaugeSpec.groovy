@@ -1,0 +1,53 @@
+package com.github.reiseburo.verspaetung.metrics
+
+import spock.lang.*
+
+import com.github.reiseburo.verspaetung.KafkaConsumer
+import com.github.reiseburo.verspaetung.TopicPartition
+
+class ConsumerGaugeSpec extends Specification {
+    private KafkaConsumer consumer
+    private TopicPartition tp
+
+    def setup() {
+        this.tp = new TopicPartition('spock-topic', 1)
+        this.consumer = new KafkaConsumer(tp.topic, tp.partition, 'spock-consumer')
+    }
+
+    def "constructor should work"() {
+        given:
+        ConsumerGauge gauge = new ConsumerGauge(consumer, [:], [:])
+
+        expect:
+        gauge.consumer instanceof KafkaConsumer
+        gauge.consumers instanceof AbstractMap
+    }
+
+    def "getValue() should source a value from the map"() {
+        given:
+        ConsumerGauge gauge = new ConsumerGauge(this.consumer,
+                                                [(this.consumer) : 2],
+                                                [(this.tp) : 3])
+
+        expect:
+        gauge.value == 1
+    }
+
+    def "getValue() should return zero for a consumer not in the map"() {
+        given:
+        ConsumerGauge gauge = new ConsumerGauge(this.consumer, [:], [:])
+
+        expect:
+        gauge.value == 0
+    }
+
+    def "getValue() should return zero instead of a negative number"() {
+        given:
+        ConsumerGauge gauge = new ConsumerGauge(this.consumer,
+                                                    [(this.consumer) : 10],
+                                                    [(this.tp) : 5])
+
+        expect:
+        gauge.value == 0
+    }
+}

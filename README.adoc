@@ -1,6 +1,6 @@
-image:https://travis-ci.org/lookout/verspaetung.svg?branch=master["Build Status", link="https://travis-ci.org/lookout/verspaetung"]
+image:https://travis-ci.org/reiseburo/verspaetung.svg?branch=master["Build Status", link="https://travis-ci.org/reiseburo/verspaetung"]
 
-image::https://api.bintray.com/packages/lookout/systems/verspaetung/images/download.svg[link="https://bintray.com/lookout/systems/verspaetung/_latestVersion"]
+image::https://api.bintray.com/packages/reiseburo/systems/verspaetung/images/download.svg[link="https://bintray.com/reiseburo/systems/verspaetung/_latestVersion"]
 
 Verspätung is a small utility which aims to help identify delay of link:http://kafka.apache.org[Kafka] consumers.
 
