@@ -20,4 +20,4 @@ NOTE: This is mostly meant for the developer team.
 Currently releases can be produced by simply pushing a Git tag to this GitHub
 repository. This will cause Travis CI to build and test the tag, which if it is
 successful, will automatically publish to
-link:https://bintray.com/lookout/systems/verspaetung[Bintray].
+link:https://bintray.com/reiseburo/apps/verspaetung[Bintray].

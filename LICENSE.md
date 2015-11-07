@@ -1,4 +1,4 @@
-*Copyright (c) 2015 Lookout, Inc*
+*Copyright (c) 2015 Lookout, Inc, R. Tyler Croy*
 
 MIT License
 
