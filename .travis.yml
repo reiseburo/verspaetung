@@ -14,7 +14,6 @@ script:
 
 env:
   global:
-    secure: MzcJafov6+fztyym0hZFTxjirTAgVFqFRO4pSSoDUZV71jHBYRKLmQxiaYpqdl9d7Q7Jz7UfNZRSisNwZQdeZjs0B9yJwy9m1mDlJaUXIWN/xzW04qPnZ5zxh1yJHK+UHIw5G2qRZSE42m9G3TSRBlUz6OMk+tr2UYErfnKzcsc=
+  - secure: X71NKVXJjyG1C6/fZUTxdQ6HwAcaNRWSc0m/VRXsaiZwgXjIr+C+Uz9X4iu6Q52YAc+7CrvftAbIxgQhf+TBtvvnGeZgWXuYqf6Cx1weyL/6xsttOLsEGdtHU9jvrtw4tHRXxu/6F+8QAot8VRwUsCB4IL5Y3epshddbk+/1d9Q=
 
-after_success:
-    "./gradlew bintrayUpload -PbintrayUser=rtyler -PbintrayKey=${BINTRAY_KEY}"
+after_success: "./gradlew bintrayUpload -PbintrayUser=rtyler -PbintrayKey=${BINTRAY_KEY}"
