@@ -169,9 +169,6 @@ class Main {
                                                  }
                                              });
         logger.info('Starting wait loop...')
-        synchronized(this) {
-            wait()
-        }
     }
 
     static void registerMetricFor(KafkaConsumer consumer,
