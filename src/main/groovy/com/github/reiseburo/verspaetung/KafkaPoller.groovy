@@ -159,7 +159,7 @@ class KafkaPoller extends Thread {
      */
     private void reconnect() {
         disconnectConsumers()
-        LOGGER.info('Creating SimpleConsumer connections for brokers')
+        LOGGER.info('Creating SimpleConsumer connections for brokers {}', this.brokers)
         synchronized(this.brokers) {
             this.brokers.each { Broker b ->
                 SimpleConsumer consumer = new SimpleConsumer(b.host,
