@@ -6,7 +6,6 @@ import groovy.json.JsonSlurper
 import groovy.transform.TypeChecked
 
 import org.apache.curator.framework.CuratorFramework
-import org.apache.curator.framework.recipes.cache.ChildData
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent
 
 /**
@@ -16,19 +15,17 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent
  */
 @TypeChecked
 class BrokerTreeWatcher extends AbstractTreeWatcher {
-    static final Integer INVALID_BROKER_ID = -1
     private static final String BROKERS_PATH = '/brokers/ids'
 
-    private Boolean isTreeInitialized = false
-    private final JsonSlurper json
     private final List<Closure> onBrokerUpdates
-    private final List<KafkaBroker> brokers
+    private final BrokerManager manager
+    private final PojoFactory factory
 
     BrokerTreeWatcher(CuratorFramework client) {
         super(client)
 
-        this.json = new JsonSlurper()
-        this.brokers = Collections.synchronizedList([])
+        this.factory = new PojoFactory(new JsonSlurper())
+        this.manager = new BrokerManager()
         this.onBrokerUpdates = []
     }
 
@@ -37,57 +34,39 @@ class BrokerTreeWatcher extends AbstractTreeWatcher {
     }
 
     /**
-     * Process events like NODE_ADDED and NODE_REMOVED to keep an up to date
-     * list of brokers
+     * Process events to keep an up to date list of brokers
      */
     @Override
     void childEvent(CuratorFramework client, TreeCacheEvent event) {
-        /* If we're initialized that means we should have all our brokers in
-         * our internal list already and we can fire an event
-         */
-        if (event.type == TreeCacheEvent.Type.INITIALIZED) {
-            this.isTreeInitialized = true
-            this.onBrokerUpdates.each { Closure c ->
-                c?.call(this.brokers)
-            }
-            return
+        switch (event.type) {
+            case TreeCacheEvent.Type.INITIALIZED:
+                this.manager.online()
+                break
+            case TreeCacheEvent.Type.NODE_ADDED:
+                KafkaBroker broker = this.factory.createKafkaBroker(event)
+                this.manager.add(broker)
+                break
+            case TreeCacheEvent.Type.NODE_UPDATED:
+                KafkaBroker broker = this.factory.createKafkaBroker(event)
+                this.manager.update(broker)
+                break
+            case TreeCacheEvent.Type.NODE_REMOVED:
+                KafkaBroker broker = this.factory.createKafkaBroker(event)
+                this.manager.remove(broker)
+                break
+            // TODO these 3 events might come with path which can be mapped
+            //      to a specific broker
+            case TreeCacheEvent.Type.CONNECTION_LOST:
+            case TreeCacheEvent.Type.CONNECTION_SUSPENDED:
+                this.manager.offline()
+                break
+            case TreeCacheEvent.Type.CONNECTION_RECONNECTED:
+                this.manager.online()
+                break
         }
 
-        if (event.type != TreeCacheEvent.Type.NODE_ADDED) {
-            return
+        this.onBrokerUpdates.each { Closure c ->
+            c?.call(this.manager.list())
         }
-
-        ChildData nodeData = event.data
-        Integer brokerId = brokerIdFromPath(nodeData.path)
-
-        if (brokerId == INVALID_BROKER_ID) {
-            return
-        }
-
-        Object brokerData = json.parseText(new String(nodeData.data, 'UTF-8'))
-
-        this.brokers << new KafkaBroker(brokerData, brokerId)
-
-        if (this.isTreeInitialized) {
-            this.onBrokerUpdates.each { Closure c ->
-                c?.call(this.brokers)
-            }
-        }
-    }
-
-    /**
-     * Process a path string from Zookeeper for the Kafka broker's ID
-     *
-     * We're expecting paths like: /brokers/ids/1231524312
-     */
-    Integer brokerIdFromPath(String path) {
-        List<String> pathParts = path?.split('/') as List
-
-        if ((pathParts == null) ||
-            (pathParts.size() != 4)) {
-            return INVALID_BROKER_ID
-        }
-
-        return new Integer(pathParts[-1])
     }
 }

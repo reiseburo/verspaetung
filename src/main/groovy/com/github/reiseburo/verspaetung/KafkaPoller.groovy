@@ -37,7 +37,7 @@ class KafkaPoller extends Thread {
         this.brokerConsumerMap = [:]
         this.brokers = []
         this.onDelta = []
-        setName("Verspaetung Kafka Poller")
+        setName('Verspaetung Kafka Poller')
     }
 
     /* There are a number of cases where we intentionally swallow stacktraces
@@ -89,7 +89,7 @@ class KafkaPoller extends Thread {
         }
     }
 
-    @SuppressWarnings(['CatchException'])
+    @SuppressWarnings('CatchException')
     private void dumpMetadata() {
         LOGGER.debug('dumping meta-data')
 
@@ -158,6 +158,7 @@ class KafkaPoller extends Thread {
     /**
      * Blocking reconnect to the Kafka brokers
      */
+    @SuppressWarnings('CatchException')
     private void reconnect() {
         disconnectConsumers()
         LOGGER.info('Creating SimpleConsumer connections for brokers {}', this.brokers)
@@ -172,7 +173,7 @@ class KafkaPoller extends Thread {
                     consumer.connect()
                     this.brokerConsumerMap[broker.id] = consumer
                 }
-                catch(Exception e) {
+                catch (Exception e) {
                     LOGGER.info('Error connecting cunsumer to {}', broker, e)
                 }
             }
@@ -187,13 +188,14 @@ class KafkaPoller extends Thread {
         this.keepRunning = false
     }
 
+    @SuppressWarnings('CatchException')
     private void disconnectConsumers() {
         this.brokerConsumerMap.each { Integer brokerId, SimpleConsumer client ->
             LOGGER.info('Disconnecting {}', client)
             try {
                 client?.disconnect()
             }
-            catch(Exception e) {
+            catch (Exception e) {
                 LOGGER.info('Error disconnecting {}', client, e)
             }
         }
