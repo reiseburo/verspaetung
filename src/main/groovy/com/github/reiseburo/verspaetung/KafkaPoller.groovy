@@ -37,6 +37,7 @@ class KafkaPoller extends Thread {
         this.brokerConsumerMap = [:]
         this.brokers = []
         this.onDelta = []
+        setName('Verspaetung Kafka Poller')
     }
 
     /* There are a number of cases where we intentionally swallow stacktraces
@@ -88,7 +89,7 @@ class KafkaPoller extends Thread {
         }
     }
 
-    @SuppressWarnings(['CatchException'])
+    @SuppressWarnings('CatchException')
     private void dumpMetadata() {
         LOGGER.debug('dumping meta-data')
 
@@ -157,18 +158,24 @@ class KafkaPoller extends Thread {
     /**
      * Blocking reconnect to the Kafka brokers
      */
+    @SuppressWarnings('CatchException')
     private void reconnect() {
         disconnectConsumers()
-        LOGGER.info('Creating SimpleConsumer connections for brokers')
+        LOGGER.info('Creating SimpleConsumer connections for brokers {}', this.brokers)
         synchronized(this.brokers) {
-            this.brokers.each { Broker b ->
-                SimpleConsumer consumer = new SimpleConsumer(b.host,
-                                                             b.port,
+            this.brokers.each { Broker broker ->
+                SimpleConsumer consumer = new SimpleConsumer(broker.host,
+                                                             broker.port,
                                                              KAFKA_TIMEOUT,
                                                              KAFKA_BUFFER,
                                                              KAFKA_CLIENT_ID)
-                consumer.connect()
-                this.brokerConsumerMap[b.id] = consumer
+                try {
+                    consumer.connect()
+                    this.brokerConsumerMap[broker.id] = consumer
+                }
+                catch (Exception e) {
+                    LOGGER.info('Error connecting cunsumer to {}', broker, e)
+                }
             }
         }
         this.shouldReconnect = false
@@ -181,10 +188,16 @@ class KafkaPoller extends Thread {
         this.keepRunning = false
     }
 
+    @SuppressWarnings('CatchException')
     private void disconnectConsumers() {
         this.brokerConsumerMap.each { Integer brokerId, SimpleConsumer client ->
             LOGGER.info('Disconnecting {}', client)
-            client?.disconnect()
+            try {
+                client?.disconnect()
+            }
+            catch (Exception e) {
+                LOGGER.info('Error disconnecting {}', client, e)
+            }
         }
     }
 

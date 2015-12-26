@@ -8,10 +8,28 @@ class KafkaBroker {
     final private Integer port
     final private Integer brokerId
 
-    KafkaBroker(Object jsonObject, Integer brokerId) {
-        this.host = jsonObject.host
-        this.port = jsonObject.port
+    KafkaBroker(String host, Integer port, Integer brokerId) {
+        this.host = host
+        this.port = port
         this.brokerId = brokerId
+    }
+
+    @Override
+    int hashCode() {
+        return this.brokerId
+    }
+
+    @Override
+    boolean equals(Object compared) {
+        if (this.is(compared)) {
+            return true
+        }
+
+        if (!(compared instanceof KafkaBroker)) {
+            return false
+        }
+
+        return compared.brokerId == brokerId
     }
 
     @Override
