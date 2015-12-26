@@ -11,7 +11,7 @@ plugins {
 
 group = "com.github.reiseburo"
 description = "A utility for monitoring the delay of Kafka consumers"
-version = '0.5.0'
+version = '0.6.0'
 mainClassName = 'com.github.reiseburo.verspaetung.Main'
 defaultTasks 'check', 'assemble'
 
