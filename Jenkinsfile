@@ -32,6 +32,10 @@ node(nodeLabel) {
     timeout(30) {
         sh './gradlew -iS'
     }
+
+    stage 'Capture test results and artifacts'
+    step([$class: 'JUnitResultArchiver', testResults: 'build/test-results/**/*.xml'])
+    step([$class: 'ArtifactArchiver', artifacts: 'build/libs/*.jar', fingerprint: true])
 }
 
 // vim: ft=groovy
