@@ -3,9 +3,7 @@
  * built, tested and deployed
  */
 
-def nodeLabel = 'java'
-
-node(nodeLabel) {
+node {
     stage 'Clean workspace'
     /* Running on a fresh Docker instance makes this redundant, but just in
      * case the host isn't configured to give us a new Docker image for every
